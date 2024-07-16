@@ -30,7 +30,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 import BarChartIcon from '@mui/icons-material/BarChart';
 import LayersIcon from '@mui/icons-material/Layers';
-import CustomersList from './listItems';
+import CustomersList from './CustomersList';
 
 
 const drawerWidth = 240;
@@ -95,7 +95,7 @@ export default function Dashboard() {
   };
 
   const onCustomerClick = () => {
-    setShowCustomers(true); // Set showCustomers state to true when clicking on PeopleIcon
+    setShowCustomers(!showCustomers); 
   };
 
   return (

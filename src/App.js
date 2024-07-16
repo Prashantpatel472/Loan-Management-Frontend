@@ -8,7 +8,7 @@ import './App.css';
 import Login from './features/Auth/login';
 import Dashboard from './features/Dashboard/Dashboard';
 import AuthResetPassword from './features/Auth/AuthResetPassword';
-import CustomersList from './features/Dashboard/listItems';
+import CustomersList from './features/Dashboard/CustomersList';
 
 function App() {
   const isLoggedIn = useSelector(state => state.auth.isLoggedIn); // Replace 'auth' with your slice name
