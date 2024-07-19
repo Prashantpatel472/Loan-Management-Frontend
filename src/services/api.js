@@ -1,8 +1,7 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
-import { isApiError } from "../common/utility";
-import requestsApi from "../app/requestsApi";
+// import { LOGIN_API_URL } from "./apiManagement,js";
 
-const API_URL = 'http://localhost:8080/user/login'; // Replace with your actual API URL
+import { LOGIN_API_URL } from "./apiManagement,js";
+
 
 
 export const loginApi = async (postData) => {
@@ -11,14 +10,14 @@ export const loginApi = async (postData) => {
   formData.append('password', postData.password);
 
   try {
-    const response = await fetch(API_URL, {
+    const response = await fetch( 'http://localhost:8080/user/login', {
       method: 'POST',
       body: formData,
     });
 console.log("response",response);
     if (!response.ok) {
       alert("Login failed");
-      throw new Error('Login failed'); // Handle error as needed
+      throw new Error('Login failed'); 
     }
 
    return response;

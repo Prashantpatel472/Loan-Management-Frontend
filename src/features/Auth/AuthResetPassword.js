@@ -85,7 +85,7 @@ const AuthResetPassword = () => {
                         message: "Password reset link sent successfully",
                     })
                 );
-                navigate("/login"); // Redirect to login page after password reset link sent
+                navigate("/"); // Redirect to login page after password reset link sent
             } else {
                 alert(" failed");
                 dispatch(

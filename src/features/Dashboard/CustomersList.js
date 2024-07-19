@@ -1,9 +1,8 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
-  CircularProgress,
+
   Grid,
-  List,
   Table,
   TableBody,
   TableCell,
@@ -14,16 +13,26 @@ import {
   Button,
   TextField,
   IconButton,
+  CircularProgress,
 } from '@mui/material';
-import requestsApi from '../../app/requestsApi';
+import { Delete, Edit } from '@mui/icons-material';
 
 const API_URL = 'http://localhost:8080/customer';
 
-const CustomersList = () => {
-  const [customers, setCustomers] = React.useState([]);
-  const [loading, setLoading] = React.useState(false);
-  const [creatingCustomer, setCreatingCustomer] = React.useState(false);
-  const [newCustomerData, setNewCustomerData] = React.useState({
+const CustomersList = ({ handleShowLoan }) => {
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [creatingCustomer, setCreatingCustomer] = useState(false);
+  const [newCustomerData, setNewCustomerData] = useState({
+    name: '',
+    city: '',
+    phone: '',
+    address: '',
+    fatherName: '',
+  });
+  const [updatingCustomerId, setUpdatingCustomerId] = useState(null);
+  const [updatingCustomerData, setUpdatingCustomerData] = useState({
+   id:'',
     name: '',
     city: '',
     phone: '',
@@ -31,7 +40,7 @@ const CustomersList = () => {
     fatherName: '',
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     getCustomers();
   }, []);
 
@@ -46,13 +55,13 @@ const CustomersList = () => {
       setCustomers(data);
     } catch (error) {
       console.error('Error fetching customers:', error);
-      // Handle error state or show error message
     } finally {
-      
+      setLoading(false);
     }
   };
 
-  const handleCreateCustomer = async () => {
+  const handleCreateCustomer = async (event) => {
+    event.preventDefault();
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
@@ -87,7 +96,6 @@ const CustomersList = () => {
       if (!response.ok) {
         throw new Error('Failed to delete customer');
       }
-      // Filter out the deleted customer from the list
       const updatedCustomers = customers.filter((customer) => customer.id !== customerId);
       setCustomers(updatedCustomers);
     } catch (error) {
@@ -95,17 +103,69 @@ const CustomersList = () => {
     }
   };
 
+  const handleUpdateCustomer = async (customerId) => {
+    try {
+      const response = await fetch(`${API_URL}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatingCustomerData),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update customer');
+      }
+      const updatedCustomer = await response.json();
+      const updatedCustomers = customers.map((customer) =>
+        customer.id === customerId ? updatedCustomer : customer
+      );
+      setCustomers(updatedCustomers);
+      cancelUpdate();
+    } catch (error) {
+      console.error('Error updating customer:', error);
+    }
+  };
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-    setNewCustomerData({
-      ...newCustomerData,
-      [name]: value,
-    });
+    if (updatingCustomerId) {
+      setUpdatingCustomerData({
+        ...updatingCustomerData,
+        [name]: value,
+      });
+    } else {
+      setNewCustomerData({
+        ...newCustomerData,
+        [name]: value,
+      });
+    }
   };
 
   const toggleCreateCustomer = () => {
     setCreatingCustomer(!creatingCustomer);
-    setLoading(!loading);
+  };
+
+  const cancelUpdate = () => {
+    setUpdatingCustomerId(null);
+    setUpdatingCustomerData({
+      name: '',
+      city: '',
+      phone: '',
+      address: '',
+      fatherName: '',
+    });
+  };
+
+  const startUpdate = (customer) => {
+    setUpdatingCustomerId(customer.id);
+    setUpdatingCustomerData({
+      id:customer.id,
+      name: customer.name,
+      city: customer.city,
+      phone: customer.phone,
+      address: customer.address,
+      fatherName: customer.fatherName,
+    });
   };
 
   return (
@@ -183,33 +243,110 @@ const CustomersList = () => {
         </Box>
       )}
 
-      {loading && (
+      {loading ? (
+        <CircularProgress />
+      ) : (
         <TableContainer>
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell>Customer ID</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>City</TableCell>
                 <TableCell>Phone</TableCell>
                 <TableCell>Address</TableCell>
                 <TableCell>Father's Name</TableCell>
-                <TableCell>Action</TableCell>
+                <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {customers.map((customer) => (
                 <TableRow key={customer.id}>
-                  <TableCell>{customer.name}</TableCell>
-                  <TableCell>{customer.city}</TableCell>
-                  <TableCell>{customer.phone}</TableCell>
-                  <TableCell>{customer.address}</TableCell>
-                  <TableCell>{customer.fatherName}</TableCell>
+                  <TableCell>{customer.id}</TableCell>
+                  <TableCell
+                    onClick={() => handleShowLoan(customer.id)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {customer.id === updatingCustomerId ? (
+                      <TextField
+                        fullWidth
+                        name="name"
+                        value={updatingCustomerData.name}
+                        onChange={handleInputChange}
+                      />
+                    ) : (
+                      customer.name
+                    )}
+                  </TableCell>
                   <TableCell>
-                    <IconButton
-                      color="secondary"
-                      onClick={() => handleDeleteCustomer(customer.id)}
-                    >
-                      Delete
+                    {customer.id === updatingCustomerId ? (
+                      <TextField
+                        fullWidth
+                        name="city"
+                        value={updatingCustomerData.city}
+                        onChange={handleInputChange}
+                      />
+                    ) : (
+                      customer.city
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {customer.id === updatingCustomerId ? (
+                      <TextField
+                        fullWidth
+                        name="phone"
+                        value={updatingCustomerData.phone}
+                        onChange={handleInputChange}
+                      />
+                    ) : (
+                      customer.phone
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {customer.id === updatingCustomerId ? (
+                      <TextField
+                        fullWidth
+                        name="address"
+                        value={updatingCustomerData.address}
+                        onChange={handleInputChange}
+                      />
+                    ) : (
+                      customer.address
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {customer.id === updatingCustomerId ? (
+                      <TextField
+                        fullWidth
+                        name="fatherName"
+                        value={updatingCustomerData.fatherName}
+                        onChange={handleInputChange}
+                      />
+                    ) : (
+                      customer.fatherName
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {customer.id === updatingCustomerId ? (
+                      <Box>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleUpdateCustomer(customer.id)}
+                        >
+                          Save
+                        </Button>
+                        <Button variant="outlined" onClick={cancelUpdate}>
+                          Cancel
+                        </Button>
+                      </Box>
+                    ) : (
+                      <IconButton onClick={() => startUpdate(customer)}>
+                        <Edit />
+                      </IconButton>
+                    )}
+                    <IconButton onClick={() => handleDeleteCustomer(customer.id)}>
+                      <Delete />
                     </IconButton>
                   </TableCell>
                 </TableRow>

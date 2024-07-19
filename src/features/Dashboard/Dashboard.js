@@ -1,25 +1,22 @@
-import * as React from 'react';
-import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import MuiDrawer from '@mui/material/Drawer';
-import MuiAppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
-import Badge from '@mui/material/Badge';
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
-import MenuIcon from '@mui/icons-material/Menu';
+import { Logout } from '@mui/icons-material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import MenuIcon from '@mui/icons-material/Menu';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import PeopleIcon from '@mui/icons-material/People';
 import { Box, List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import MuiAppBar from '@mui/material/AppBar';
+import Badge from '@mui/material/Badge';
+import CssBaseline from '@mui/material/CssBaseline';
+import Divider from '@mui/material/Divider';
+import MuiDrawer from '@mui/material/Drawer';
+import IconButton from '@mui/material/IconButton';
+import { createTheme, styled, ThemeProvider } from '@mui/material/styles';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import * as React from 'react';
 import MainCard from '../../components/MainCard';
-import { Logout } from '@mui/icons-material';
 
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 
 
@@ -30,6 +27,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 import BarChartIcon from '@mui/icons-material/BarChart';
 import LayersIcon from '@mui/icons-material/Layers';
+import Loan from '../loan/loan';
 import CustomersList from './CustomersList';
 
 
@@ -84,6 +82,8 @@ const defaultTheme = createTheme();
 export default function Dashboard() {
   const [open, setOpen] = React.useState(true);
   const [showCustomers, setShowCustomers] = React.useState(false); // State to control showing CustomersList
+  const [showLoan, setShowLoan] = React.useState(false); // State to control showing Loan
+  const [selectedCustomerId, setSelectedCustomerId] = React.useState(0);
   const navigate = useNavigate();
 
   const toggleDrawer = () => {
@@ -91,11 +91,24 @@ export default function Dashboard() {
   };
 
   const handleLogout = () => {
-    navigate('/login');
+    navigate('/');
   };
 
   const onCustomerClick = () => {
-    setShowCustomers(!showCustomers); 
+    setShowCustomers(!showCustomers);
+    setShowLoan(false); 
+  };
+  
+  const handleClickhShowLoan = (customerId) => {
+    setShowCustomers(false);
+    setSelectedCustomerId(customerId);
+    setShowLoan(!showLoan);
+    
+  };
+  const handleShowLoan = (customerId) => {
+    setShowLoan(!showLoan);
+    setSelectedCustomerId(customerId);
+    setShowCustomers(!showCustomers);
   };
 
   return (
@@ -155,13 +168,13 @@ export default function Dashboard() {
                 </ListItemIcon>
                 <ListItemText primary="Dashboard" />
               </ListItemButton>
-              <ListItemButton>
+              <ListItemButton onClick={handleClickhShowLoan}>
                 <ListItemIcon>
                   <ShoppingCartIcon />
                 </ListItemIcon>
                 <ListItemText primary="Loan" />
               </ListItemButton>
-              <ListItemButton onClick={onCustomerClick}> {/* Update onClick handler */}
+              <ListItemButton onClick={onCustomerClick}>
                 <ListItemIcon>
                   <PeopleIcon />
                 </ListItemIcon>
@@ -183,27 +196,29 @@ export default function Dashboard() {
             <Divider sx={{ my: 1 }} />
           </Drawer>
           <Box
-            component="main"
-            sx={{
-              backgroundColor: (theme) =>
-                theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
-              flexGrow: 1,
-              height: '100vh',
-              overflow: 'auto',
-            }}
-          >
-            <Toolbar />
-            <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-             
-              {open && (
-                <IconButton onClick={() => console.log('Show customers')}>
-                  {/* Add icon or button related to customers */}
-                </IconButton>
-              )}
-              {showCustomers && <CustomersList />} {/* Conditionally render CustomersList */}
-             
-            </Container>
-          </Box>
+  component="main"
+  sx={{
+    backgroundColor: (theme) =>
+      theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
+    flexGrow: 1,
+    height: '100vh',
+    overflow: 'auto',
+  }}
+>
+  <Toolbar />
+  {showCustomers && <CustomersList handleShowLoan={handleShowLoan} />}
+  
+        
+            {selectedCustomerId && (
+             showLoan && selectedCustomerId && <Loan customerId={selectedCustomerId} handleBack={handleShowLoan}  />
+            )}
+         
+      
+  {/* <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    {showCustomers && <CustomersList handleShowLoan={handleShowLoan} />}
+    {showLoan && selectedCustomerId && <Loan customerId={selectedCustomerId} />}
+  </Container> */}
+</Box>
         </Box>
       </ThemeProvider>
     </MainCard>
