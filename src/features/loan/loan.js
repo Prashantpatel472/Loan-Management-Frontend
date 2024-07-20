@@ -22,7 +22,9 @@ const Loan = ({ customerId, handleBack }) => {
   const [showCreateLoanForm, setShowsCreateLoanForm] = useState(false);
 
   const [newLoanData, setNewLoanData] = useState({
-    customerId: customerId ,
+    "customer": {
+        "id": customerId
+    },
     firmName: '',
     loanDescription: '',
     loanDate: '',
@@ -34,7 +36,7 @@ const Loan = ({ customerId, handleBack }) => {
   const fetchLoanDetails = async (customerId) => {
     let id = isNaN(parseFloat(customerId)) ? 0 : customerId;
     try {
-      const response = await fetch(`http://localhost:8080/loan/getAll?customerId=${id}&page=0&size=10&sortBy=id`);
+      const response = await fetch(`http://localhost:8080/loan/getAll?customerId=${id}&page=0&size=20&sortBy=id`);
       if (!response.ok) {
         throw new Error('Failed to fetch loan details');
       }
@@ -47,7 +49,7 @@ const Loan = ({ customerId, handleBack }) => {
 
   const handleCreateLoan = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/create`, {
+      const response = await fetch(`http://localhost:8080/loan/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
