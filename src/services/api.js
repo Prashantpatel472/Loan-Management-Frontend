@@ -20,7 +20,9 @@ console.log("response",response);
       throw new Error('Login failed'); 
     }
 
-   return response;
+    const data = await response.json();
+    console.log("data",data);
+    return data;
   } catch (error) {
     throw error;
   }

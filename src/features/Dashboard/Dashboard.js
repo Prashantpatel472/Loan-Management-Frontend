@@ -1,3 +1,4 @@
+// features/Dashboard/Dashboard.js
 import { Logout } from '@mui/icons-material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -17,19 +18,15 @@ import * as React from 'react';
 import MainCard from '../../components/MainCard';
 
 import { useNavigate } from 'react-router-dom';
-
-
-
-
+import { useDispatch } from 'react-redux';
+import { logout } from '../../reducers/authSlice';
 
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-
 import BarChartIcon from '@mui/icons-material/BarChart';
 import LayersIcon from '@mui/icons-material/Layers';
 import Loan from '../loan/loan';
 import CustomersList from './CustomersList';
-
 
 const drawerWidth = 240;
 
@@ -81,30 +78,34 @@ const defaultTheme = createTheme();
 
 export default function Dashboard() {
   const [open, setOpen] = React.useState(true);
-  const [showCustomers, setShowCustomers] = React.useState(false); // State to control showing CustomersList
+  const [showCustomers, setShowCustomers] = React.useState(true); // State to control showing CustomersList
   const [showLoan, setShowLoan] = React.useState(false); // State to control showing Loan
   const [selectedCustomerId, setSelectedCustomerId] = React.useState(0);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const toggleDrawer = () => {
     setOpen(!open);
   };
 
   const handleLogout = () => {
+    dispatch(logout());
+    localStorage.removeItem('token');
+    localStorage.removeItem('loggedUser');
     navigate('/');
   };
 
   const onCustomerClick = () => {
-    setShowCustomers(!showCustomers);
+    setShowCustomers(true);
     setShowLoan(false); 
   };
-  
-  const handleClickhShowLoan = (customerId) => {
+
+  const handleClickShowLoan = (customerId) => {
     setShowCustomers(false);
     setSelectedCustomerId(customerId);
-    setShowLoan(!showLoan);
-    
+    setShowLoan(true);
   };
+
   const handleShowLoan = (customerId) => {
     setShowLoan(!showLoan);
     setSelectedCustomerId(customerId);
@@ -168,7 +169,7 @@ export default function Dashboard() {
                 </ListItemIcon>
                 <ListItemText primary="Dashboard" />
               </ListItemButton>
-              <ListItemButton onClick={handleClickhShowLoan}>
+              <ListItemButton onClick={handleClickShowLoan}>
                 <ListItemIcon>
                   <ShoppingCartIcon />
                 </ListItemIcon>
@@ -196,29 +197,19 @@ export default function Dashboard() {
             <Divider sx={{ my: 1 }} />
           </Drawer>
           <Box
-  component="main"
-  sx={{
-    backgroundColor: (theme) =>
-      theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
-    flexGrow: 1,
-    height: '100vh',
-    overflow: 'auto',
-  }}
->
-  <Toolbar />
-  {showCustomers && <CustomersList handleShowLoan={handleShowLoan} />}
-  
-        
-            {selectedCustomerId && (
-             showLoan && selectedCustomerId && <Loan customerId={selectedCustomerId} handleBack={handleShowLoan}  />
-            )}
-         
-      
-  {/* <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-    {showCustomers && <CustomersList handleShowLoan={handleShowLoan} />}
-    {showLoan && selectedCustomerId && <Loan customerId={selectedCustomerId} />}
-  </Container> */}
-</Box>
+            component="main"
+            sx={{
+              backgroundColor: (theme) =>
+                theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
+              flexGrow: 1,
+              height: '100vh',
+              overflow: 'auto',
+            }}
+          >
+            <Toolbar />
+            {showCustomers && <CustomersList handleShowLoan={handleShowLoan} />}
+            {selectedCustomerId && showLoan && <Loan customerId={selectedCustomerId} handleBack={handleShowLoan} />}
+          </Box>
         </Box>
       </ThemeProvider>
     </MainCard>

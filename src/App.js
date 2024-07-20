@@ -1,23 +1,28 @@
+// App.js
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux'
-// import Dashboard from './features/Dashboard/Dashboard'; // Assuming this is the path to your Dashboard component
-import { getLocalStorageData, isUserLoggedIn } from './common/utility'; // Assuming utility functions for authentication
-import { loginSuccess } from './reducers/authSlice'; // Assuming your authSlice for handling authentication
+import { useSelector, useDispatch } from 'react-redux';
+import { getLocalStorageData, isUserLoggedIn } from './common/utility';
+import { loginSuccess } from './reducers/authSlice';
 import './App.css';
 import Login from './features/Auth/login';
 import Dashboard from './features/Dashboard/Dashboard';
 import AuthResetPassword from './features/Auth/AuthResetPassword';
 import CustomersList from './features/Dashboard/CustomersList';
+import PrivateRoute from './features/routes/PrivateRoute';
+
 
 function App() {
-  const isLoggedIn = useSelector(state => state.auth.isLoggedIn); // Replace 'auth' with your slice name
+  const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const userData = getLocalStorageData('loggedUser'); // Example function to get user data from localStorage
-    if (userData) {
-      dispatch(loginSuccess(userData)); // Dispatch action to update Redux state with user data
+    const token = localStorage.getItem('token');
+    if (token) {
+      const userData = getLocalStorageData('loggedUser');
+      if (userData) {
+        dispatch(loginSuccess(userData));
+      }
     }
   }, [dispatch]);
 
@@ -25,12 +30,10 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={ <Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/" element={<Login />} />
+          <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/reset" element={<AuthResetPassword />} />
-          <Route path="/customer" element={<CustomersList />} />
-          
-
+          <Route path="/customer" element={<PrivateRoute><CustomersList /></PrivateRoute>} />
         </Routes>
       </BrowserRouter>
     </div>
