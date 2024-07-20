@@ -119,8 +119,10 @@ const CustomersList = ({ handleShowLoan }) => {
       const updatedCustomers = customers.map((customer) =>
         customer.id === customerId ? updatedCustomer : customer
       );
+      setLoading(false);
       setCustomers(updatedCustomers);
       cancelUpdate();
+      handleShowLoan();
     } catch (error) {
       console.error('Error updating customer:', error);
     }
@@ -262,10 +264,10 @@ const CustomersList = ({ handleShowLoan }) => {
             <TableBody>
               {customers.map((customer) => (
                 <TableRow key={customer.id}>
-                  <TableCell>{customer.id}</TableCell>
+                  <TableCell  onClick={() => handleShowLoan(customer.id)}
+                    style={{ cursor: 'pointer' }}>{customer.id}</TableCell>
                   <TableCell
-                    onClick={() => handleShowLoan(customer.id)}
-                    style={{ cursor: 'pointer' }}
+                   
                   >
                     {customer.id === updatingCustomerId ? (
                       <TextField
@@ -341,13 +343,16 @@ const CustomersList = ({ handleShowLoan }) => {
                         </Button>
                       </Box>
                     ) : (
+                      <Box>
                       <IconButton onClick={() => startUpdate(customer)}>
                         <Edit />
                       </IconButton>
-                    )}
-                    <IconButton onClick={() => handleDeleteCustomer(customer.id)}>
+                      <IconButton onClick={() => handleDeleteCustomer(customer.id)}>
                       <Delete />
                     </IconButton>
+                      </Box>
+                    )}
+                   
                   </TableCell>
                 </TableRow>
               ))}
