@@ -6,10 +6,10 @@ const LoanCalculator = () => {
   const [loanData, setLoanData] = useState({
     loanAmount: 0,
     interestRate: 0,
-    tenureYears: 0,
-    frequency: 'Yearly', // Default frequency
-    timePeriodDays: 0,   // Initial time period in days
-    timePeriodMonths: 0, // Initial time period in months
+    tenureYears: 1,
+    frequency: 'Yearly', 
+    timePeriodDays: 1,   
+    timePeriodMonths: 1, 
   });
 
   const frequencyOptions = ['Yearly', 'Monthly', 'Daily'];
