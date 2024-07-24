@@ -27,7 +27,6 @@ const CustomersList = ({ handleShowLoan }) => {
   
 
   const [customerData, setCustomerData] = useState({
-    id: '',
     name: '',
     fatherName: '',
     phone: '',
@@ -58,6 +57,13 @@ const CustomersList = ({ handleShowLoan }) => {
       }
       const data = await response.json();
       setCustomers(data);
+      // convertToBase64(data.photo).then((base64) => {
+      //   setImagePreview(base64);
+      //   setCustomerData((prevData) => ({
+      //     ...prevData,
+      //     photo: base64,
+      //   }));
+      // });
     } catch (error) {
       console.error('Error fetching customers:', error);
     } finally {
@@ -100,19 +106,9 @@ const CustomersList = ({ handleShowLoan }) => {
         if (!response.ok) {
             throw new Error(`Failed to ${isEditing ? 'update' : 'create'} customer`);
         }
-
-        const savedCustomer = await response.json();
-        setCustomers((prevCustomers) => {
-            if (isEditing) {
-                return prevCustomers.map((customer) =>
-                    customer.id === savedCustomer.id ? savedCustomer : customer
-                );
-            } else {
-                return [...prevCustomers, savedCustomer];
-            }
-        });
-
-        resetForm();
+        isEditing(false);
+        isCreating(false);
+              
     } catch (error) {
         console.error(`Error ${isEditing ? 'updating' : 'creating'} customer:`, error);
     }
@@ -148,11 +144,14 @@ const CustomersList = ({ handleShowLoan }) => {
     const file = event.target.files[0];
     setImage(file);
 
-    
-      setImagePreview(file);
-      
+    convertToBase64(file).then((base64) => {
+      setImagePreview(base64);
+      setCustomerData((prevData) => ({
+        ...prevData,
+        photo: base64,
+      }));
+    });
   };
-
   const handleChangeDocument = (event) => {
     const file = event.target.files[0];
     setDocument(file);
@@ -177,7 +176,7 @@ const CustomersList = ({ handleShowLoan }) => {
   setShowForm(!showForm);
   setIsCreating(!isCreating);
   setCustomerData({
-    id: '',
+  
     name: '',
     fatherName: '',
     phone: '',
@@ -196,7 +195,7 @@ const CustomersList = ({ handleShowLoan }) => {
   const resetForm = () => {
     setIsEditing(!isEditing);
     setCustomerData({
-      id: '',
+      
       name: '',
       fatherName: '',
       phone: '',
@@ -389,8 +388,10 @@ const CustomersList = ({ handleShowLoan }) => {
                   <TableCell>Aadhar Number</TableCell>
                     <TableCell>alternatePhone</TableCell>
                     <TableCell>createdDate</TableCell>
+                    <TableCell>Photo</TableCell>
                 
                 <TableCell>Actions</TableCell>
+               
               </TableRow>
             </TableHead>
             <TableBody>
@@ -414,6 +415,7 @@ const CustomersList = ({ handleShowLoan }) => {
                     <TableCell>{customer.aadharNumber}</TableCell>
                     <TableCell>{customer.alternatePhone}</TableCell>
                     <TableCell>{customer.createdDate}</TableCell>
+                    <TableCell>{ <img src={customer.photo} alt="Image Preview" width="100" />}</TableCell>
                     <TableCell>
                       <IconButton onClick={() => startUpdate(customer)}>
                         <Edit />
@@ -423,6 +425,7 @@ const CustomersList = ({ handleShowLoan }) => {
                       </IconButton>
                       {/* <Button onClick={() => handleShowLoan(customer.id)}>Loan</Button> */}
                     </TableCell>
+                   
                   </TableRow>
                 ))
               )}

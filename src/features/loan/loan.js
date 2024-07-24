@@ -89,7 +89,9 @@ const Loan = ({ customerId, handleBack }) => {
       console.error('Error creating loan:', error);
     }
   };
+  const handleShowLoanDetail=async(loanId)=>{
 
+  }
   const handleDeleteLoan = async (loanId) => {
     try {
       const response = await fetch(`http://localhost:8080/loan/delete/${loanId}`, {
@@ -157,7 +159,9 @@ const Loan = ({ customerId, handleBack }) => {
             <Table>
               <TableHead>
                 <TableRow>
+
                   <TableCell>Loan no</TableCell>
+                  <TableCell>customer name</TableCell>
                   <TableCell>Firm Name</TableCell>
                   <TableCell>Loan Date</TableCell>
                   <TableCell>Loan Amount</TableCell>
@@ -168,7 +172,8 @@ const Loan = ({ customerId, handleBack }) => {
               <TableBody>
                 {loanDetailsList.map((loan, index) => (
                   <TableRow key={index}>
-                    <TableCell>{loan.id}</TableCell>
+                    <TableCell>{loan.loanId}</TableCell>
+                    <TableCell>{loan.name}</TableCell>
                     <TableCell>{loan.firmName}</TableCell>
                     <TableCell>{loan.loanDate}</TableCell>
                     <TableCell>{loan.loanAmount}</TableCell>
@@ -177,9 +182,9 @@ const Loan = ({ customerId, handleBack }) => {
                       <Button
                         variant="contained"
                         color="secondary"
-                        onClick={() => handleDeleteLoan(loan.id)}
+                        onClick={() => handleShowLoanDetail(loan.id)}
                       >
-                        Delete
+                        Show loan Detail
                       </Button>
                     </TableCell>
                   </TableRow>
