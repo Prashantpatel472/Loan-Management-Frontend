@@ -138,7 +138,7 @@ const LoanCalculator = () => {
           />
         </Grid>
         <Grid item xs={12}>
-          <Button variant="contained" color="primary" onClick={calculateLoan}>
+          <Button variant="contained" color="secondary" onClick={calculateLoan}>
             Calculate Loan
           </Button>
         </Grid>

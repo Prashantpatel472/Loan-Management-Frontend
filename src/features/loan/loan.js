@@ -16,14 +16,19 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Stack,
+  TablePagination, // Import TablePagination
 } from '@mui/material';
 import LoanCalculator from './LoanCalculator';
 
-const Loan = ({ customerId, handleBack }) => {
+const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
   const [loanDetailsList, setLoanDetailsList] = useState([]);
   const [showLoanCalculator, setShowLoanCalculator] = useState(false);
   const [showLoan, setShowLoan] = useState(true);
   const [showCreateLoanForm, setShowsCreateLoanForm] = useState(false);
+  const [selectedSortBy, setSelectedSortBy] = useState("id");
+  const [page, setPage] = useState(0); // Current page state
+  const [rowsPerPage, setRowsPerPage] = useState(10); // Rows per page
 
   const [newLoanData, setNewLoanData] = useState({
     customer: {
@@ -38,20 +43,25 @@ const Loan = ({ customerId, handleBack }) => {
     interestFrequency: '',
     securityItemDescription: '',
     loanType: '',
+    modifiedDate: '',
+    totalPaidInterest: 0,
+    isClosed: false,
   });
 
   const firms = ['Firm1', 'Firm2', 'Firm3'];
   const loanTypes = ['gold', 'property', 'other'];
 
-  const fetchLoanDetails = async (customerId) => {
+  const fetchLoanDetails = async (sortBy, page, size) => {
     let id = isNaN(parseFloat(customerId)) ? 0 : customerId;
     try {
-      const response = await fetch(`http://localhost:8080/loan?customerId=${id}&page=0&size=20&sortBy=id`);
+      const response = await fetch(`http://localhost:8080/loan?customerId=${id}&page=${page}&size=${size}&sortBy=${sortBy}`);
       if (!response.ok) {
         throw new Error('Failed to fetch loan details');
       }
       const data = await response.json();
       setLoanDetailsList(data.content);
+      // Update total rows if provided by the API
+      // setTotalRows(data.totalElements);
     } catch (error) {
       console.error('Error fetching loan details:', error);
     }
@@ -59,6 +69,10 @@ const Loan = ({ customerId, handleBack }) => {
 
   const handleCreateLoan = async () => {
     try {
+      console.log('newLoanData:', newLoanData);
+
+      JSON.stringify(newLoanData);
+
       const response = await fetch(`http://localhost:8080/loan`, {
         method: 'POST',
         headers: {
@@ -66,13 +80,16 @@ const Loan = ({ customerId, handleBack }) => {
         },
         body: JSON.stringify(newLoanData),
       });
+
       if (!response.ok) {
         throw new Error('Failed to create loan');
       }
+      fetchLoanDetails(selectedSortBy, page, rowsPerPage);
 
-      fetchLoanDetails(customerId); // Refresh loan details after creating
       setNewLoanData({
-        ...newLoanData,
+        customer: {
+          id: customerId,
+        },
         firmName: '',
         loanDescription: '',
         loanDate: '',
@@ -82,16 +99,19 @@ const Loan = ({ customerId, handleBack }) => {
         interestFrequency: '',
         securityItemDescription: '',
         loanType: '',
+        modifiedDate: '',
+        totalPaidInterest: 0,
+        isClosed: false,
       });
-      setShowLoan(true); // Show loan details view after creating
-      setShowsCreateLoanForm(false); // Hide create loan form after creating
+
+      setShowLoan(true);
+      setShowsCreateLoanForm(false);
+      alert("loan created successfully")
     } catch (error) {
       console.error('Error creating loan:', error);
     }
   };
-  const handleShowLoanDetail=async(loanId)=>{
 
-  }
   const handleDeleteLoan = async (loanId) => {
     try {
       const response = await fetch(`http://localhost:8080/loan/delete/${loanId}`, {
@@ -101,18 +121,32 @@ const Loan = ({ customerId, handleBack }) => {
         throw new Error('Failed to delete loan');
       }
 
-      const updatedLoanList = loanDetailsList.filter(loan => loan.id !== loanId);
-      setLoanDetailsList(updatedLoanList);
+      fetchLoanDetails(selectedSortBy, page, rowsPerPage);
     } catch (error) {
       console.error('Error deleting loan:', error);
     }
   };
 
+  const handlePayment = async (loanId) => {
+    try {
+      const response = await fetch(`http://localhost:8080/loan/${loanId}`, {
+        method: 'PUT',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update loan');
+      }
+
+      fetchLoanDetails(selectedSortBy, page, rowsPerPage);
+    } catch (error) {
+      console.error('Error updating loan:', error);
+    }
+  };
+
   useEffect(() => {
     if (customerId) {
-      fetchLoanDetails(customerId);
+      fetchLoanDetails(selectedSortBy, page, rowsPerPage);
     }
-  }, [customerId]);
+  }, [customerId, selectedSortBy, page, rowsPerPage]);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -123,7 +157,25 @@ const Loan = ({ customerId, handleBack }) => {
   };
 
   const handleBackClick = () => {
-    handleBack(); // Assuming handleBack is a prop function passed from parent component
+    handleBack();
+  };
+
+  const handleSortChange = (sortBy) => {
+    setSelectedSortBy(sortBy);
+    fetchLoanDetails(sortBy, page, rowsPerPage);
+  };
+
+  // Handle page changes
+  const handlePageChange = (event, newPage) => {
+    setPage(newPage);
+    fetchLoanDetails(selectedSortBy, newPage, rowsPerPage);
+  };
+
+  // Handle rows per page changes
+  const handleRowsPerPageChange = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Reset page to 0 on rows per page change
+    fetchLoanDetails(selectedSortBy, 0, parseInt(event.target.value, 10));
   };
 
   return (
@@ -134,38 +186,40 @@ const Loan = ({ customerId, handleBack }) => {
             <Typography variant="h6" gutterBottom>
               Loan Details
             </Typography>
-
-            {!showCreateLoanForm ? (
-              <Button
-                variant="outlined"
-                onClick={() => { setShowsCreateLoanForm(!showCreateLoanForm); setShowLoan(!showLoan); }}
-              >
-                Create New Loan
+            <Stack direction="row" spacing={2}>
+              {!showCreateLoanForm ? (
+                <Button
+                  color="secondary"
+                  variant="contained"
+                  onClick={() => { setShowsCreateLoanForm(!showCreateLoanForm); setShowLoan(!showLoan); }}
+                >
+                  Create New Loan
+                </Button>
+              ) : (
+                <Button
+                  color="secondary"
+                  variant="contained"
+                  onClick={() => { setShowsCreateLoanForm(!showCreateLoanForm); setShowLoan(!showLoan); }}
+                >
+                  Cancel
+                </Button>
+              )}
+              <Button color="secondary" variant="contained" onClick={handleBackClick}>
+                Back
               </Button>
-            ) : (
-              <Button
-                variant="outlined"
-                onClick={() => { setShowsCreateLoanForm(!showCreateLoanForm); setShowLoan(!showLoan); }}
-              >
-                Cancel
-              </Button>
-            )}
-            <Button variant="outlined" onClick={handleBackClick}>
-              Back
-            </Button>
+            </Stack>
           </Grid>
 
           <TableContainer component={Card}>
             <Table>
               <TableHead>
                 <TableRow>
-
-                  <TableCell>Loan no</TableCell>
-                  <TableCell>customer name</TableCell>
-                  <TableCell>Firm Name</TableCell>
-                  <TableCell>Loan Date</TableCell>
-                  <TableCell>Loan Amount</TableCell>
-                  <TableCell>Payment Date</TableCell>
+                  <TableCell onClick={() => handleSortChange("id")}>Loan no</TableCell>
+                  <TableCell onClick={() => handleSortChange("name")}>Customer Name</TableCell>
+                  <TableCell onClick={() => handleSortChange("firmName")}>Firm Name</TableCell>
+                  <TableCell onClick={() => handleSortChange("loanDate")}>Loan Date</TableCell>
+                  <TableCell onClick={() => handleSortChange("loanAmount")}>Loan Amount</TableCell>
+                  <TableCell onClick={() => handleSortChange("paymentDate")}>Payment Date</TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -179,19 +233,39 @@ const Loan = ({ customerId, handleBack }) => {
                     <TableCell>{loan.loanAmount}</TableCell>
                     <TableCell>{loan.paymentDate}</TableCell>
                     <TableCell>
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={() => handleShowLoanDetail(loan.id)}
-                      >
-                        Show loan Detail
-                      </Button>
+                      <Stack direction="row" spacing={2}>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={() => handleShowLoanDetail(loan.loanId)}
+                        >
+                          Show Loan Detail
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={() => handlePayment(loan.loanId)}
+                        >
+                          Payment
+                        </Button>
+                      </Stack>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
+
+          {/* Add TablePagination component */}
+          <TablePagination
+            rowsPerPageOptions={[10, 25, 50]}
+            component="div"
+            count={loanDetailsList.length} // You may need to update this based on your total number of rows
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handlePageChange}
+            onRowsPerPageChange={handleRowsPerPageChange}
+          />
         </Card>
       )}
 
@@ -310,7 +384,7 @@ const Loan = ({ customerId, handleBack }) => {
             <Grid item xs={12}>
               <Button
                 variant="contained"
-                color="primary"
+                color="secondary"
                 onClick={handleCreateLoan}
               >
                 Create Loan
@@ -322,7 +396,7 @@ const Loan = ({ customerId, handleBack }) => {
 
       <Grid container spacing={3} sx={{ mt: 2 }}>
         <Grid item>
-          <Button variant="outlined" onClick={() => setShowLoanCalculator(!showLoanCalculator)}>
+          <Button color='secondary' variant="contained" onClick={() => setShowLoanCalculator(!showLoanCalculator)}>
             {showLoanCalculator ? 'Hide Calculator' : 'Show Calculator'}
           </Button>
         </Grid>

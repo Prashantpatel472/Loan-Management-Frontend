@@ -218,7 +218,7 @@ const AuthResetPassword = () => {
                             size="large"
                             type="submit"
                             variant="contained"
-                            color="primary"
+                            color="secondary"
                         >
                             Reset Password
                         </Button>

@@ -47,7 +47,7 @@ const CustomersList = ({ handleShowLoan }) => {
   useEffect(() => {
     getCustomers();
   }, []);
-
+  const photoSrc = `data:image/jpeg;base64,${customers?.photo}`;
   const getCustomers = async () => {
     setLoading(true);
     try {
@@ -56,14 +56,8 @@ const CustomersList = ({ handleShowLoan }) => {
         throw new Error('Failed to fetch customers');
       }
       const data = await response.json();
+      console.log('data', data);
       setCustomers(data);
-      // convertToBase64(data.photo).then((base64) => {
-      //   setImagePreview(base64);
-      //   setCustomerData((prevData) => ({
-      //     ...prevData,
-      //     photo: base64,
-      //   }));
-      // });
     } catch (error) {
       console.error('Error fetching customers:', error);
     } finally {
@@ -96,19 +90,20 @@ const CustomersList = ({ handleShowLoan }) => {
         }
 
         const method = isEditing ? 'PUT' : 'POST';
-        const url = isEditing ? `${API_URL}/${customerData.id}` : API_URL;
+        const url =  API_URL;
 
         const response = await fetch(url, {
             method,
             body: formData,
         });
-
+       
         if (!response.ok) {
             throw new Error(`Failed to ${isEditing ? 'update' : 'create'} customer`);
         }
-        isEditing(false);
-        isCreating(false);
-              
+        setShowForm(!showForm);
+        setIsCreating(!isCreating);
+        getCustomers(); 
+        alert("customer created successfully")   
     } catch (error) {
         console.error(`Error ${isEditing ? 'updating' : 'creating'} customer:`, error);
     }
@@ -216,7 +211,7 @@ const CustomersList = ({ handleShowLoan }) => {
     <Box>
       <Grid container justifyContent="space-between" alignItems="center">
         <Typography variant="h6">Customers List</Typography>
-        <Button variant="contained" onClick={handleCreate}>
+        <Button color="secondary" variant="contained" onClick={handleCreate}>
           {isCreating ? 'Cancel' : 'Create Customer'}
         </Button>
       </Grid>
@@ -344,7 +339,7 @@ const CustomersList = ({ handleShowLoan }) => {
                 style={{ display: 'none' }}
               />
               <label htmlFor="select-image">
-                <Button variant="contained" color="primary" component="span">
+                <Button variant="contained" color="secondary" component="span">
                   Upload Image
                 </Button>
               </label>
@@ -359,13 +354,13 @@ const CustomersList = ({ handleShowLoan }) => {
                 style={{ display: 'none' }}
               />
               <label htmlFor="select-document">
-                <Button variant="contained" color="primary" component="span">
+                <Button variant="contained" color="secondary" component="span">
                   Upload Document
                 </Button>
               </label>
             </Grid>
             <Grid item xs={12}>
-              <Button variant="contained" color="primary" type="submit">
+              <Button variant="contained" color="secondary" type="submit">
                 {isEditing ? 'Update' : 'Save'}
               </Button>
             </Grid>
@@ -381,14 +376,13 @@ const CustomersList = ({ handleShowLoan }) => {
               <TableCell>Customer Id</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell> Father Name</TableCell>
-                <TableCell>Phone</TableCell>
-                <TableCell>City</TableCell>
-                <TableCell>State</TableCell>
-                 <TableCell>district</TableCell>
+                <TableCell>Address</TableCell>
+                <TableCell>Phone no</TableCell>
+                 
                   <TableCell>Aadhar Number</TableCell>
-                    <TableCell>alternatePhone</TableCell>
-                    <TableCell>createdDate</TableCell>
-                    <TableCell>Photo</TableCell>
+                    {/* <TableCell>alternatePhone</TableCell> */}
+                    {/* <TableCell>createdDate</TableCell> */}
+                    {/* <TableCell>Photo</TableCell> */}
                 
                 <TableCell>Actions</TableCell>
                
@@ -408,21 +402,18 @@ const CustomersList = ({ handleShowLoan }) => {
                    
                     <TableCell>{customer.name}</TableCell>
                     <TableCell>{customer.fatherName}</TableCell>
+                  
+                    <TableCell>{customer.address+", "+ customer.city+", "+customer.district+", "+customer.state+", "+customer.pincode}</TableCell>
                     <TableCell>{customer.phone}</TableCell>
-                    <TableCell>{customer.city}</TableCell>
-                    <TableCell>{customer.state}</TableCell>
-                    <TableCell>{customer.district}</TableCell>
                     <TableCell>{customer.aadharNumber}</TableCell>
-                    <TableCell>{customer.alternatePhone}</TableCell>
-                    <TableCell>{customer.createdDate}</TableCell>
-                    <TableCell>{ <img src={customer.photo} alt="Image Preview" width="100" />}</TableCell>
+                    {/* <TableCell>{customer.alternatePhone}</TableCell> */}
+                    {/* <TableCell>{customer.createdDate}</TableCell>
+                    <TableCell>{ <img src={`data:image/jpeg;base64,${customer?.photo}`} alt="Image Preview" width="100" />}</TableCell> */}
                     <TableCell>
                       <IconButton onClick={() => startUpdate(customer)}>
                         <Edit />
                       </IconButton>
-                      <IconButton onClick={() => handleDeleteCustomer(customer.id)}>
-                        <Delete />
-                      </IconButton>
+                     
                       {/* <Button onClick={() => handleShowLoan(customer.id)}>Loan</Button> */}
                     </TableCell>
                    

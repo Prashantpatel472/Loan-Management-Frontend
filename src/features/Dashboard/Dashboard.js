@@ -26,7 +26,9 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import LayersIcon from '@mui/icons-material/Layers';
 import Loan from '../loan/loan';
-import CustomersList from './CustomersList';
+import CustomersList from '../customers/CustomersList';
+import Reports from '../reports/report';
+import LoanDetail from '../loan/LoanDetail';
 
 const drawerWidth = 240;
 
@@ -81,13 +83,20 @@ export default function Dashboard() {
   const [showCustomers, setShowCustomers] = React.useState(true); // State to control showing CustomersList
   const [showLoan, setShowLoan] = React.useState(false); // State to control showing Loan
   const [selectedCustomerId, setSelectedCustomerId] = React.useState(0);
+  const [selectedSortBy, setSelectedSortBy] = React.useState("id");
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  const [showReport, setShowReport] = React.useState(false);
+  const [showLoanDetail, setShowLoanDetail] = React.useState(false);
+  const [selectedLoanId, setSelectedLoanId] = React.useState(0);
   const toggleDrawer = () => {
     setOpen(!open);
   };
-
+  
+  const handleShowLoanDetail = (loanId) => {
+    setShowLoanDetail(!showLoanDetail)
+    setSelectedLoanId(loanId);
+  };
   const handleLogout = () => {
     dispatch(logout());
     localStorage.removeItem('token');
@@ -99,6 +108,12 @@ export default function Dashboard() {
     setShowCustomers(true);
     setShowLoan(false); 
   };
+  const onReportClick = () => {
+    setShowCustomers(false);
+    setShowLoan(false);
+    setShowReport(!showReport); 
+  };
+  
 
   const handleClickShowLoan = (customerId) => {
     setShowCustomers(false);
@@ -106,10 +121,11 @@ export default function Dashboard() {
     setShowLoan(true);
   };
 
-  const handleShowLoan = (customerId) => {
+  const handleShowLoan = (customerId,sortBy) => {
     setShowLoan(!showLoan);
     setSelectedCustomerId(customerId);
     setShowCustomers(!showCustomers);
+    setSelectedSortBy(sortBy);
   };
 
   return (
@@ -117,7 +133,7 @@ export default function Dashboard() {
       <ThemeProvider theme={defaultTheme}>
         <Box sx={{ display: 'flex' }}>
           <CssBaseline />
-          <AppBar position="absolute" open={open}>
+          <AppBar  color="secondary"  position="absolute" open={open}>
             <Toolbar
               sx={{
                 pr: '24px', // keep right padding when drawer closed
@@ -125,7 +141,7 @@ export default function Dashboard() {
             >
               <IconButton
                 edge="start"
-                color="inherit"
+                color="secondary" 
                 aria-label="open drawer"
                 onClick={toggleDrawer}
                 sx={{
@@ -181,8 +197,8 @@ export default function Dashboard() {
                 </ListItemIcon>
                 <ListItemText primary="Customers" />
               </ListItemButton>
-              <ListItemButton>
-                <ListItemIcon>
+              <ListItemButton onClick={onReportClick}>
+                <ListItemIcon >
                   <BarChartIcon />
                 </ListItemIcon>
                 <ListItemText primary="Reports" />
@@ -208,7 +224,10 @@ export default function Dashboard() {
           >
             <Toolbar />
             {showCustomers && <CustomersList handleShowLoan={handleShowLoan} />}
-            {selectedCustomerId && showLoan && <Loan customerId={selectedCustomerId} handleBack={handleShowLoan} />}
+            {selectedCustomerId && showLoan && <Loan  customerId={selectedCustomerId} handleBack={handleShowLoan}  handleShowLoanDetail={handleShowLoanDetail}/>}
+            {showReport && <Reports />}
+            {showLoanDetail && <LoanDetail loanId={selectedLoanId}/>}
+
           </Box>
         </Box>
       </ThemeProvider>
