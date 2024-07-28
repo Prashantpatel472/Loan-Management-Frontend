@@ -25,7 +25,7 @@ import {
 } from '@mui/material';
 import LoanCalculator from './LoanCalculator';
 
-const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
+const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement}) => {
   const [loanDetailsList, setLoanDetailsList] = useState([]);
   const [showLoanCalculator, setShowLoanCalculator] = useState(false);
   const [showLoan, setShowLoan] = useState(true);
@@ -53,6 +53,7 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
   const [openPaymentPopup, setOpenPaymentPopup] = useState(false);
   const [selectedLoanId, setSelectedLoanId] = useState(null);
   const [paymentAmount, setPaymentAmount] = useState(0);
+  const [paymentDate, setPaymentDate] = useState();
 
   const firms = ['Firm1', 'Firm2', 'Firm3'];
   const loanTypes = ['gold', 'property', 'other'];
@@ -128,7 +129,7 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
 
   const handlePaymentSubmit = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/loan/payment?loanId=${selectedLoanId}&loanPayment=${paymentAmount}`, {
+      const response = await fetch(`http://localhost:8080/loan/payment?loanId=${selectedLoanId}&loanPayment=${paymentAmount}&paymentDate=${paymentDate}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         
@@ -233,7 +234,7 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
                     <TableCell>{loan.loanAmount}</TableCell>
                     <TableCell>{loan.paymentDate}</TableCell>
                     <TableCell>
-                      <Stack direction="row" spacing={2}>
+                      <Stack direction="row" spacing={3}>
                         <Button
                           variant="contained"
                           color="secondary"
@@ -247,6 +248,13 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
                           onClick={() => handlePayment(loan.loanId)}
                         >
                           Payment
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={() => handleStatement(loan.loanId)}
+                        >
+                          Statement
                         </Button>
                       </Stack>
                     </TableCell>
@@ -415,6 +423,15 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
             fullWidth
             value={paymentAmount}
             onChange={(e) => setPaymentAmount(e.target.value)}
+          />
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Payment Date"
+            type="Date"
+            fullWidth
+            value={paymentDate}
+            onChange={(e) => setPaymentDate(e.target.value)}
           />
         </DialogContent>
         <DialogActions>

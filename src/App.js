@@ -1,4 +1,3 @@
-// App.js
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -10,7 +9,7 @@ import Dashboard from './features/Dashboard/Dashboard';
 import AuthResetPassword from './features/Auth/AuthResetPassword';
 import CustomersList from './features/customers/CustomersList';
 import PrivateRoute from './features/routes/PrivateRoute';
-
+import ReportDetails from './features/reports/ReportDetails'; // Import the new ReportDetails component
 
 function App() {
   const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
@@ -34,6 +33,7 @@ function App() {
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/reset" element={<AuthResetPassword />} />
           <Route path="/customer" element={<PrivateRoute><CustomersList /></PrivateRoute>} />
+          <Route path="/report-details" element={<PrivateRoute><ReportDetails /></PrivateRoute>} /> 
         </Routes>
       </BrowserRouter>
     </div>

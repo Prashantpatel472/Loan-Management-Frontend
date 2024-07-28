@@ -339,6 +339,7 @@ const CustomersList = ({ handleShowLoan }) => {
               </Grid>
               
               <Grid item xs={12} sm={6}>
+              <Box mt={2}>
                 <input
                   accept="image/*"
                   type="file"
@@ -351,6 +352,7 @@ const CustomersList = ({ handleShowLoan }) => {
                     Upload Image
                   </Button>
                 </label>
+                </Box>
                 {imagePreview && <img src={imagePreview} alt="Image Preview" width="100" />}
               </Grid>
               <Grid item xs={12} sm={6}>
