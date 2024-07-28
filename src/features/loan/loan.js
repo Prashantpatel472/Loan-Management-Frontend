@@ -17,7 +17,11 @@ import {
   Select,
   MenuItem,
   Stack,
-  TablePagination, // Import TablePagination
+  TablePagination,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
 } from '@mui/material';
 import LoanCalculator from './LoanCalculator';
 
@@ -27,13 +31,11 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
   const [showLoan, setShowLoan] = useState(true);
   const [showCreateLoanForm, setShowsCreateLoanForm] = useState(false);
   const [selectedSortBy, setSelectedSortBy] = useState("id");
-  const [page, setPage] = useState(0); // Current page state
-  const [rowsPerPage, setRowsPerPage] = useState(10); // Rows per page
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const [newLoanData, setNewLoanData] = useState({
-    customer: {
-      id: customerId,
-    },
+    customer: { id: customerId },
     firmName: '',
     loanDescription: '',
     loanDate: '',
@@ -48,6 +50,10 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
     isClosed: false,
   });
 
+  const [openPaymentPopup, setOpenPaymentPopup] = useState(false);
+  const [selectedLoanId, setSelectedLoanId] = useState(null);
+  const [paymentAmount, setPaymentAmount] = useState(0);
+
   const firms = ['Firm1', 'Firm2', 'Firm3'];
   const loanTypes = ['gold', 'property', 'other'];
 
@@ -60,8 +66,6 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
       }
       const data = await response.json();
       setLoanDetailsList(data.content);
-      // Update total rows if provided by the API
-      // setTotalRows(data.totalElements);
     } catch (error) {
       console.error('Error fetching loan details:', error);
     }
@@ -70,14 +74,9 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
   const handleCreateLoan = async () => {
     try {
       console.log('newLoanData:', newLoanData);
-
-      JSON.stringify(newLoanData);
-
       const response = await fetch(`http://localhost:8080/loan`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newLoanData),
       });
 
@@ -85,11 +84,8 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
         throw new Error('Failed to create loan');
       }
       fetchLoanDetails(selectedSortBy, page, rowsPerPage);
-
       setNewLoanData({
-        customer: {
-          id: customerId,
-        },
+        customer: { id: customerId },
         firmName: '',
         loanDescription: '',
         loanDate: '',
@@ -103,10 +99,9 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
         totalPaidInterest: 0,
         isClosed: false,
       });
-
       setShowLoan(true);
       setShowsCreateLoanForm(false);
-      alert("loan created successfully")
+      alert("Loan created successfully");
     } catch (error) {
       console.error('Error creating loan:', error);
     }
@@ -120,7 +115,6 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
       if (!response.ok) {
         throw new Error('Failed to delete loan');
       }
-
       fetchLoanDetails(selectedSortBy, page, rowsPerPage);
     } catch (error) {
       console.error('Error deleting loan:', error);
@@ -128,17 +122,28 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
   };
 
   const handlePayment = async (loanId) => {
+    setSelectedLoanId(loanId);
+    setOpenPaymentPopup(true);
+  };
+
+  const handlePaymentSubmit = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/loan/${loanId}`, {
+      const response = await fetch(`http://localhost:8080/loan/payment?loanId=${selectedLoanId}&loanPayment=${paymentAmount}`, {
         method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        
       });
+
       if (!response.ok) {
-        throw new Error('Failed to update loan');
+        throw new Error('Failed to make payment');
       }
 
+      setOpenPaymentPopup(false);
       fetchLoanDetails(selectedSortBy, page, rowsPerPage);
+      setPaymentAmount(0);
+      alert("Payment successful");
     } catch (error) {
-      console.error('Error updating loan:', error);
+      console.error('Error making payment:', error);
     }
   };
 
@@ -150,10 +155,7 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-    setNewLoanData(prevState => ({
-      ...prevState,
-      [name]: value,
-    }));
+    setNewLoanData(prevState => ({ ...prevState, [name]: value }));
   };
 
   const handleBackClick = () => {
@@ -165,16 +167,14 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
     fetchLoanDetails(sortBy, page, rowsPerPage);
   };
 
-  // Handle page changes
   const handlePageChange = (event, newPage) => {
     setPage(newPage);
     fetchLoanDetails(selectedSortBy, newPage, rowsPerPage);
   };
 
-  // Handle rows per page changes
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); // Reset page to 0 on rows per page change
+    setPage(0);
     fetchLoanDetails(selectedSortBy, 0, parseInt(event.target.value, 10));
   };
 
@@ -214,12 +214,12 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell onClick={() => handleSortChange("id")}>Loan no</TableCell>
-                  <TableCell onClick={() => handleSortChange("name")}>Customer Name</TableCell>
-                  <TableCell onClick={() => handleSortChange("firmName")}>Firm Name</TableCell>
-                  <TableCell onClick={() => handleSortChange("loanDate")}>Loan Date</TableCell>
-                  <TableCell onClick={() => handleSortChange("loanAmount")}>Loan Amount</TableCell>
-                  <TableCell onClick={() => handleSortChange("paymentDate")}>Payment Date</TableCell>
+                  <TableCell style={{ cursor: 'pointer' }} onClick={() => handleSortChange("id")}>Loan no</TableCell>
+                  <TableCell style={{ cursor: 'pointer' }} onClick={() => handleSortChange("name")}>Customer Name</TableCell>
+                  <TableCell style={{ cursor: 'pointer' }} onClick={() => handleSortChange("firmName")}>Firm Name</TableCell>
+                  <TableCell style={{ cursor: 'pointer' }} onClick={() => handleSortChange("loanDate")}>Loan Date</TableCell>
+                  <TableCell style={{ cursor: 'pointer' }} onClick={() => handleSortChange("loanAmount")}>Loan Amount</TableCell>
+                  <TableCell style={{ cursor: 'pointer' }} onClick={() => handleSortChange("paymentDate")}>Payment Date</TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -256,11 +256,10 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
             </Table>
           </TableContainer>
 
-          {/* Add TablePagination component */}
           <TablePagination
             rowsPerPageOptions={[10, 25, 50]}
             component="div"
-            count={loanDetailsList.length} // You may need to update this based on your total number of rows
+            count={loanDetailsList.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handlePageChange}
@@ -403,6 +402,30 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail }) => {
       </Grid>
 
       {showLoanCalculator && <LoanCalculator />}
+      
+      {/* Payment Popup */}
+      <Dialog open={openPaymentPopup} onClose={() => setOpenPaymentPopup(false)}>
+        <DialogTitle>Enter Payment Amount</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Payment Amount"
+            type="number"
+            fullWidth
+            value={paymentAmount}
+            onChange={(e) => setPaymentAmount(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenPaymentPopup(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handlePaymentSubmit} color="primary">
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

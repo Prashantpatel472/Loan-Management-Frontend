@@ -11,7 +11,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Divider from '@mui/material/Divider';
 import MuiDrawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
-import { createTheme, styled, ThemeProvider } from '@mui/material/styles';
+import { alpha, createTheme, styled, ThemeProvider } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
@@ -109,8 +109,7 @@ export default function Dashboard() {
     setShowLoan(false); 
   };
   const onReportClick = () => {
-    setShowCustomers(false);
-    setShowLoan(false);
+   
     setShowReport(!showReport); 
   };
   
@@ -179,7 +178,15 @@ export default function Dashboard() {
             </Toolbar>
             <Divider />
             <List component="nav">
-              <ListItemButton>
+              <ListItemButton sx={{
+        minHeight: 44,
+        borderRadius: 0.75,
+        typography: 'body2',
+        color: 'text.secondary',
+        textTransform: 'capitalize',
+        fontWeight: 'fontWeightMedium',
+   
+      }}>
                 <ListItemIcon>
                   <DashboardIcon />
                 </ListItemIcon>
