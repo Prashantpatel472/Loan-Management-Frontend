@@ -25,7 +25,7 @@ import {
 } from '@mui/material';
 import LoanCalculator from './LoanCalculator';
 
-const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement}) => {
+const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement,customerList}) => {
   const [loanDetailsList, setLoanDetailsList] = useState([]);
   const [showLoanCalculator, setShowLoanCalculator] = useState(false);
   const [showLoan, setShowLoan] = useState(true);
@@ -35,7 +35,7 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement}) 
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const [newLoanData, setNewLoanData] = useState({
-    customer: { id: customerId },
+    customer: { id: customerId  },
     firmName: '',
     loanDescription: '',
     loanDate: '',
@@ -54,7 +54,7 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement}) 
   const [selectedLoanId, setSelectedLoanId] = useState(null);
   const [paymentAmount, setPaymentAmount] = useState(0);
   const [paymentDate, setPaymentDate] = useState();
-
+  const [customerNameList, setNameCustomerList] = React.useState({customerList});
   const firms = ['Firm1', 'Firm2', 'Firm3'];
   const loanTypes = ['gold', 'property', 'other'];
 
@@ -152,7 +152,7 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement}) 
     if (customerId) {
       fetchLoanDetails(selectedSortBy, page, rowsPerPage);
     }
-  }, [customerId, selectedSortBy, page, rowsPerPage]);
+  }, [customerId, selectedSortBy, page, rowsPerPage,customerNameList]);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -178,7 +178,7 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement}) 
     setPage(0);
     fetchLoanDetails(selectedSortBy, 0, parseInt(event.target.value, 10));
   };
-
+  const customerOptions = customerList?.content || [];
   return (
     <Box>
       {showLoan && (
@@ -216,7 +216,7 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement}) 
               <TableHead>
                 <TableRow>
                   <TableCell style={{ cursor: 'pointer' }} onClick={() => handleSortChange("id")}>Loan no</TableCell>
-                  <TableCell style={{ cursor: 'pointer' }} onClick={() => handleSortChange("name")}>Customer Name</TableCell>
+                  <TableCell style={{ cursor: 'pointer' }} onClick={() => handleSortChange("customer.name")}>Customer Name</TableCell>
                   <TableCell style={{ cursor: 'pointer' }} onClick={() => handleSortChange("firmName")}>Firm Name</TableCell>
                   <TableCell style={{ cursor: 'pointer' }} onClick={() => handleSortChange("loanDate")}>Loan Date</TableCell>
                   <TableCell style={{ cursor: 'pointer' }} onClick={() => handleSortChange("loanAmount")}>Loan Amount</TableCell>
@@ -279,6 +279,23 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement}) 
       {showCreateLoanForm && (
         <Box mt={4}>
           <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel id="customer-select-label">Customer</InputLabel>
+                  <Select
+                    labelId="customer-select-label"
+                    name="customer.id"
+                    value={newLoanData.customer.id || ''}
+                    onChange={handleInputChange}
+                  >
+                    {customerOptions.map(customer => (
+                      <MenuItem key={customer.id} value={customer.id}>
+                        {customer.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <InputLabel>Firm Name</InputLabel>
@@ -295,6 +312,7 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement}) 
                 </Select>
               </FormControl>
             </Grid>
+            
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth

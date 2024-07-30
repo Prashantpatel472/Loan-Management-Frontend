@@ -70,7 +70,6 @@ export default function LoanDetail({ loanId }) {
 
   return (
     <div>
-      
       <Dialog
         onClose={() => setOpen(false)}
         open={open}
@@ -82,16 +81,18 @@ export default function LoanDetail({ loanId }) {
         {loanDetail ? (
           <Box p={2}>
             <List>
-              {Object.entries(loanDetail).map(([key, value]) => (
-                <ListItem key={key} className={classes.listItem}>
-                  <Typography variant="body1" className={classes.key}>
-                    {key.replace(/([A-Z])/g, ' $1').toUpperCase()}:
-                  </Typography>
-                  <Typography variant="body1" className={classes.value}>
-                    {value}
-                  </Typography>
-                </ListItem>
-              ))}
+              {Object.entries(loanDetail)
+                .filter(([key]) => key !== 'id') // Filter out the 'id' key
+                .map(([key, value]) => (
+                  <ListItem key={key} className={classes.listItem}>
+                    <Typography variant="body1" className={classes.key}>
+                      {key.replace(/([A-Z])/g, ' $1').toUpperCase()}:
+                    </Typography>
+                    <Typography variant="body1" className={classes.value}>
+                      {value}
+                    </Typography>
+                  </ListItem>
+                ))}
             </List>
             <Box className={classes.buttonContainer}>
               <Button variant="contained" color="secondary" onClick={() => handleClose(null)}>

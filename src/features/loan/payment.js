@@ -47,8 +47,6 @@ export default function Payment({ loanId }) {
    <DialogTitle>Enter Payment Amount</DialogTitle>
    <DialogContent>
      <TextField
-       autoFocus
-       margin="dense"
        label="Payment Amount"
        type="number"
        fullWidth
@@ -56,9 +54,7 @@ export default function Payment({ loanId }) {
        onChange={(e) => setPaymentAmount(e.target.value)}
      />
      <TextField
-       autoFocus
-       margin="dense"
-       label="Payment Date"
+      label="Payment Date"
        type="Date"
        fullWidth
        value={paymentDate}

@@ -3,7 +3,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import MenuIcon from '@mui/icons-material/Menu';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import PeopleIcon from '@mui/icons-material/People';
-import { Box, Card, CardContent, CardHeader, Divider, Grid, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
+import { Box, Card, CardContent, CardHeader, Divider, Grid, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Typography, Tooltip } from '@mui/material';
 import MuiAppBar from '@mui/material/AppBar';
 import Badge from '@mui/material/Badge';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -84,6 +84,7 @@ export default function Dashboard() {
   const [showsSatement, setShowsSatement] = React.useState(false);
   const [selectedLoanId, setSelectedLoanId] = React.useState(0);
   const [showDashboard, setShowDashboard] = React.useState(false);
+  const [customerList, setCustomerList] = React.useState([]);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -119,13 +120,29 @@ export default function Dashboard() {
     setShowReport(!showReport);
     setShowDashboard(false);
   };
+  const fetchCustomerList = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/customer?page=0&size=50&sortBy=id`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch customer list');
+      }
+      const data = await response.json();
+      setCustomerList(data);
+    } catch (error) {
+      console.error('Error fetching customer list:', error);
+    }
+  };
+
 
   const handleClickShowLoan = (customerId) => {
-    setShowCustomers(false);
     setSelectedCustomerId(customerId);
+    fetchCustomerList(); // Fetch the customer list when clicking "Loan"
+    setShowCustomers(false);
     setShowLoan(true);
     setShowDashboard(false);
+    
   };
+ 
 
   const handleShowLoan = (customerId, sortBy) => {
     setShowLoan(!showLoan);
@@ -181,43 +198,53 @@ export default function Dashboard() {
             </Toolbar>
             <Divider />
             <List component="nav">
-              <ListItemButton onClick={handleShowDashboard} sx={{
-                minHeight: 44,
-                borderRadius: 0.75,
-                typography: 'body2',
-                color: 'text.secondary',
-                textTransform: 'capitalize',
-                fontWeight: 'fontWeightMedium',
-              }}>
-                <ListItemIcon>
-                  <DashboardIcon />
-                </ListItemIcon>
-                <ListItemText primary="Dashboard" />
-              </ListItemButton>
-              <ListItemButton onClick={handleClickShowLoan}>
-                <ListItemIcon>
-                  <ShoppingCartIcon />
-                </ListItemIcon>
-                <ListItemText primary="Loan" />
-              </ListItemButton>
-              <ListItemButton onClick={onCustomerClick}>
-                <ListItemIcon>
-                  <PeopleIcon />
-                </ListItemIcon>
-                <ListItemText primary="Customers" />
-              </ListItemButton>
-              <ListItemButton onClick={onReportClick}>
-                <ListItemIcon>
-                  <BarChartIcon />
-                </ListItemIcon>
-                <ListItemText primary="Reports" />
-              </ListItemButton>
-              <ListItemButton>
-                <ListItemIcon>
-                  <LayersIcon />
-                </ListItemIcon>
-                <ListItemText primary="Integrations" />
-              </ListItemButton>
+              <Tooltip title="Dashboard" placement="right">
+                <ListItemButton onClick={handleShowDashboard} sx={{
+                  minHeight: 44,
+                  borderRadius: 0.75,
+                  typography: 'body2',
+                  color: 'text.secondary',
+                  textTransform: 'capitalize',
+                  fontWeight: 'fontWeightMedium',
+                }}>
+                  <ListItemIcon>
+                    <DashboardIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Dashboard" />
+                </ListItemButton>
+              </Tooltip>
+              <Tooltip title="Loan" placement="right">
+                <ListItemButton onClick={handleClickShowLoan}>
+                  <ListItemIcon>
+                    <ShoppingCartIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Loan" />
+                </ListItemButton>
+              </Tooltip>
+              <Tooltip title="Customers" placement="right">
+                <ListItemButton onClick={onCustomerClick}>
+                  <ListItemIcon>
+                    <PeopleIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Customers" />
+                </ListItemButton>
+              </Tooltip>
+              <Tooltip title="Reports" placement="right">
+                <ListItemButton onClick={onReportClick}>
+                  <ListItemIcon>
+                    <BarChartIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Reports" />
+                </ListItemButton>
+              </Tooltip>
+              {/* <Tooltip title="Integrations" placement="right">
+                <ListItemButton>
+                  <ListItemIcon>
+                    <LayersIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Integrations" />
+                </ListItemButton>
+              </Tooltip> */}
             </List>
             <Divider sx={{ my: 1 }} />
           </Drawer>
@@ -245,7 +272,6 @@ export default function Dashboard() {
                       <Typography variant="body1">
                         Here you can manage loans, view customers, and generate reports.
                       </Typography>
-                     
                     </CardContent>
                   </Card>
                 </Grid>
@@ -257,7 +283,7 @@ export default function Dashboard() {
               )}
               {selectedCustomerId && showLoan && (
                 <Grid item xs={12}>
-                  <Loan customerId={selectedCustomerId} handleBack={handleShowLoan} handleShowLoanDetail={handleShowLoanDetail} handleStatement={handleStatement} />
+                  <Loan customerId={selectedCustomerId} handleBack={handleShowLoan} handleShowLoanDetail={handleShowLoanDetail} handleStatement={handleStatement}customerList={customerList} />
                 </Grid>
               )}
               {showReport && (

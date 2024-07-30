@@ -40,11 +40,9 @@ export default function Statement({ loanId }) {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
   const [loanDetails, setLoanDetails] = React.useState([]);
-  const [loanInfo, setLoanInfo] = React.useState(null);
 
-  const handleClose = (value) => {
+  const handleClose = () => {
     setOpen(false);
-    // Handle close actions if necessary
   };
 
   React.useEffect(() => {
@@ -58,11 +56,6 @@ export default function Statement({ loanId }) {
         }
         const data = await response.json();
         setLoanDetails(data);
-        
-        // Extract loan info from the first record
-        if (data.length > 0) {
-          setLoanInfo(data[0].loan);
-        }
       } catch (error) {
         console.error('Error fetching loan details:', error);
       }
@@ -76,33 +69,27 @@ export default function Statement({ loanId }) {
   return (
     <div>
       <Dialog
-        onClose={() => setOpen(false)}
+        onClose={handleClose}
         open={open}
         PaperProps={{
           className: classes.paper, // Apply custom styles
         }}
       >
         <DialogTitle>Statement</DialogTitle>
-        {loanInfo && loanDetails.length > 0 ? (
+        {loanDetails.length > 0 ? (
           <Box p={2}>
-            <Typography variant="h6">Loan Information</Typography>
-            <List>
-              {Object.entries(loanInfo).map(([key, value]) => (
-                <ListItem key={key} className={classes.listItem}>
-                  <Typography variant="body1" className={classes.key}>
-                    {key.replace(/([A-Z])/g, ' $1').toUpperCase()}:
-                  </Typography>
-                  <Typography variant="body1" className={classes.value}>
-                    {value.toString()}
-                  </Typography>
-                </ListItem>
-              ))}
-            </List>
-
-            <Typography variant="h6" mt={2}>Payment Records</Typography>
+            <Typography variant="h6">Payment Records</Typography>
             <List>
               {loanDetails.map((record) => (
                 <ListItem key={record.id} className={classes.listItem}>
+                  <Box>
+                    <Typography variant="body1" className={classes.key}>
+                      Customer Name:
+                    </Typography>
+                    <Typography variant="body1" className={classes.value}>
+                      {record.loan.customer.name}
+                    </Typography>
+                  </Box>
                   <Box>
                     <Typography variant="body1" className={classes.key}>
                       Payment Date:
@@ -132,7 +119,7 @@ export default function Statement({ loanId }) {
             </List>
 
             <Box className={classes.buttonContainer}>
-              <Button variant="contained" color="secondary" onClick={() => handleClose(null)}>
+              <Button variant="contained" color="secondary" onClick={handleClose}>
                 Close
               </Button>
             </Box>

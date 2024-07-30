@@ -33,7 +33,7 @@ function App() {
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/reset" element={<AuthResetPassword />} />
           <Route path="/customer" element={<PrivateRoute><CustomersList /></PrivateRoute>} />
-          <Route path="/report-details" element={<PrivateRoute><ReportDetails /></PrivateRoute>} /> 
+          
         </Routes>
       </BrowserRouter>
     </div>

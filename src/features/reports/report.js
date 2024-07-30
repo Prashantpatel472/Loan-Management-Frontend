@@ -1,12 +1,16 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
-import Button from '@mui/material/Button';
 import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
 import { makeStyles } from '@mui/styles';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { List, ListItem } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardActions from '@mui/material/CardActions';
+import Button from '@mui/material/Button';
 
 // Define styles for the dialog
 const useStyles = makeStyles({
@@ -15,17 +19,33 @@ const useStyles = makeStyles({
     height: '80vh',
     maxWidth: 'none',
   },
-  buttonContainer: {
+  card: {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'flex-start',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%',
+    textAlign: 'center',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+    transition: 'box-shadow 0.3s ease-in-out',
+    '&:hover': {
+      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.3)',
+    },
+  },
+  cardContent: {
     padding: 16,
   },
-  button: {
-    margin: '8px 0',
+  cardActions: {
+    padding: 16,
+  },
+  cardText: {
+    fontWeight: 'bold',
+    fontSize: '1.1rem',
   },
   reportContent: {
     padding: 16,
+    overflowY: 'auto', // To handle overflow if the content exceeds dialog height
+    height: 'calc(100% - 100px)', // Adjust based on card container height
   },
   listItem: {
     display: 'flex',
@@ -40,6 +60,15 @@ const useStyles = makeStyles({
     overflowWrap: 'break-word',
   },
 });
+
+const cardData = [
+  { label: 'Show All Loan Report Details', endpoint: 'loan/all' },
+  { label: 'Show Due Loan Report Details', endpoint: 'loan/due' },
+  { label: 'Show Today\'s Loan Report Details', endpoint: 'loan/today' },
+  { label: 'Show All Customer Report Details', endpoint: 'customer' },
+  { label: 'Show Today\'s Payments Report Details', endpoint: 'payment/today' },
+  { label: 'Show Customer Statement Details', endpoint: `user_statement?customerId=` },
+];
 
 export default function Reports({ loanId }) {
   const classes = useStyles();
@@ -69,7 +98,7 @@ export default function Reports({ loanId }) {
     }
   };
 
-  const handleButtonClick = (endpoint) => {
+  const handleCardClick = (endpoint) => {
     setReportType(endpoint);
     fetchReportDetails(endpoint);
     setButtonsVisible(false); // Hide buttons after a click
@@ -97,64 +126,40 @@ export default function Reports({ loanId }) {
         <DialogTitle>Reports</DialogTitle>
         <Box className={classes.buttonContainer}>
           {buttonsVisible && (
-            <>
-              <Button
-                className={classes.button}
-                variant="contained"
-                color="primary"
-                onClick={() => handleButtonClick('loan/all')}
-              >
-                Show All Loan Report Details
-              </Button>
-              <Button
-                className={classes.button}
-                variant="contained"
-                color="primary"
-                onClick={() => handleButtonClick('loan/due')}
-              >
-                Show Due Loan Report Details
-              </Button>
-              <Button
-                className={classes.button}
-                variant="contained"
-                color="primary"
-                onClick={() => handleButtonClick('loan/today')}
-              >
-                Show Today's Loan Report Details
-              </Button>
-              <Button
-                className={classes.button}
-                variant="contained"
-                color="primary"
-                onClick={() => handleButtonClick('customer')}
-              >
-                Show All Customer Report Details
-              </Button>
-              <Button
-                className={classes.button}
-                variant="contained"
-                color="primary"
-                onClick={() => handleButtonClick('payment/today')}
-              >
-                Show Today's Payments Report Details
-              </Button>
-              <Button
-                className={classes.button}
-                variant="contained"
-                color="primary"
-                onClick={() => handleButtonClick(`user_statement?customerId=${loanId}`)}
-              >
-                Show Customer Statement Details
-              </Button>
-              <Button
-                className={classes.button}
-                variant="contained"
-                color="secondary"
-                onClick={handleClose}
-              >
-                Close
-              </Button>
-            </>
+            <Grid container spacing={2}>
+              {cardData.map(({ label, endpoint }) => (
+                <Grid item xs={12} md={6} key={label}>
+                  <Card
+                    className={classes.card}
+                    onClick={() => handleCardClick(endpoint + (endpoint.includes('customerId') ? loanId : ''))}
+                  >
+                    <CardContent className={classes.cardContent}>
+                      <Typography className={classes.cardText}>
+                        {label}
+                      </Typography>
+                    </CardContent>
+                    <CardActions className={classes.cardActions}>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={() => handleCardClick(endpoint)}
+                      >
+                        View Report
+                      </Button>
+                    </CardActions>
+                  </Card>
+                </Grid>
+              ))}
+              <Grid item xs={12}>
+                <Card className={classes.card} onClick={handleClose}>
+                  <CardContent className={classes.cardContent}>
+                    <Typography className={classes.cardText}>
+                      Close
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
           )}
         </Box>
         <Box className={classes.reportContent}>
@@ -185,7 +190,7 @@ export default function Reports({ loanId }) {
                 <Button
                   className={classes.button}
                   variant="contained"
-                  color="primary"
+                  color="secondary"
                   onClick={handleDownload}
                 >
                   Download

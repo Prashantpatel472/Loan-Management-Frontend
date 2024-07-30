@@ -105,7 +105,7 @@ const CustomersList = ({ handleShowLoan }) => {
       setShowForm(!showForm);
       setIsCreating(!isCreating);
       getCustomers(); 
-      alert("Customer saved successfully");   
+      alert(isEditing?"Customer updated successfully":"Customer saved successfully");   
     } catch (error) {
       console.error(`Error ${isEditing ? 'updating' : 'creating'} customer:`, error);
     }
