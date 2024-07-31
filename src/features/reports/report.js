@@ -5,7 +5,7 @@ import Dialog from '@mui/material/Dialog';
 import { makeStyles } from '@mui/styles';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { List, ListItem } from '@mui/material';
+import { List, ListItem, Stack, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -59,6 +59,13 @@ const useStyles = makeStyles({
     textAlign: 'right',
     overflowWrap: 'break-word',
   },
+  formControl: {
+    margin: '16px',
+    minWidth: 120,
+  },
+  buttonContainer: {
+    padding: 16,
+  },
 });
 
 const cardData = [
@@ -67,25 +74,41 @@ const cardData = [
   { label: 'Show Today\'s Loan Report Details', endpoint: 'loan/today' },
   { label: 'Show All Customer Report Details', endpoint: 'customer' },
   { label: 'Show Today\'s Payments Report Details', endpoint: 'payment/today' },
-  { label: 'Show Customer Statement Details', endpoint: `user_statement?customerId=` },
+  { label: 'Show Customer Statement Details', endpoint: 'user_statement?customerId=' },
 ];
 
-export default function Reports({ loanId }) {
+export default function Reports({ customerList }) {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
   const [reportData, setReportData] = React.useState(null); // State to store report details
   const [loading, setLoading] = React.useState(false); // Loading state
   const [reportType, setReportType] = React.useState(''); // Track the type of report requested
   const [buttonsVisible, setButtonsVisible] = React.useState(true); // State to control button visibility
+  const [selectedCustomerId, setSelectedCustomerId] = React.useState(''); // State for selected customer ID
 
   const handleClose = () => {
     setOpen(false);
   };
 
+  // Ensure customerOptions is always an array
+  const customerOptions = customerList?.content || [];
+  console.log('customerOptions:', customerOptions);
+  // Log the customer list for debugging
+  React.useEffect(() => {
+    console.log('customerList:', customerList);
+  }, [customerList]);
+
   const fetchReportDetails = async (endpoint) => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8080/report/${endpoint}?download=false`);
+      let url = `http://localhost:8080/report/${endpoint}?download=false`;
+      
+      // Special case for 'Show Customer Statement Details'
+      if (reportType === 'user_statement?customerId=') {
+        url = `http://localhost:8080/report/user_statement?customerId=${selectedCustomerId}&download=false`;
+      }
+     
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error('Failed to fetch report details');
       }
@@ -100,8 +123,13 @@ export default function Reports({ loanId }) {
 
   const handleCardClick = (endpoint) => {
     setReportType(endpoint);
-    fetchReportDetails(endpoint);
-    setButtonsVisible(false); // Hide buttons after a click
+    if (endpoint === 'user_statement?customerId=') {
+      // Special case for customer statement report
+      setButtonsVisible(false); // Hide buttons
+    } else {
+      fetchReportDetails(endpoint);
+      setButtonsVisible(false); // Hide buttons after a click
+    }
   };
 
   const handleDownload = () => {
@@ -112,7 +140,151 @@ export default function Reports({ loanId }) {
   const handleBack = () => {
     setReportData(null);
     setButtonsVisible(true);
+    setReportType(''); // Reset report type when going back
   };
+
+  const handleShowCustomerStatementDetails = (endpoint) => {
+    fetchReportDetails(endpoint);
+  };
+
+  const formatReportData = (data) => {
+    if (reportType === 'user_statement?customerId=') {
+      if (Array.isArray(data)) {
+        // Handle array format for user_statement report type
+        return data.map((item, index) => (
+          <Card key={index} className={classes.card}>
+            <CardContent className={classes.cardContent}>
+              <Typography variant="h6">Report {index + 1}</Typography>
+              <List>
+                <ListItem className={classes.listItem}>
+                  <Typography variant="body1" className={classes.key}>
+                    Customer Name:
+                  </Typography>
+                  <Typography variant="body1" className={classes.value}>
+                    {item.loan?.customer?.name || 'N/A'}
+                  </Typography>
+                </ListItem>
+                <ListItem className={classes.listItem}>
+                  <Typography variant="body1" className={classes.key}>
+                    Interest Payment Amount:
+                  </Typography>
+                  <Typography variant="body1" className={classes.value}>
+                    {item.interestPaymentAmount || 'N/A'}
+                  </Typography>
+                </ListItem>
+                <ListItem className={classes.listItem}>
+                  <Typography variant="body1" className={classes.key}>
+                    Loan Payment Amount:
+                  </Typography>
+                  <Typography variant="body1" className={classes.value}>
+                    {item.loanPaymentAmount || 'N/A'}
+                  </Typography>
+                </ListItem>
+                <ListItem className={classes.listItem}>
+                  <Typography variant="body1" className={classes.key}>
+                    Payment Date:
+                  </Typography>
+                  <Typography variant="body1" className={classes.value}>
+                    {item.paymentDate || 'N/A'}
+                  </Typography>
+                </ListItem>
+              </List>
+            </CardContent>
+          </Card>
+        ));
+      } else if (typeof data === 'object') {
+        // Handle object format for user_statement report type
+        return (
+          <Card className={classes.card}>
+            <CardContent className={classes.cardContent}>
+              <Typography variant="h6">Report Details</Typography>
+              <List>
+                <ListItem className={classes.listItem}>
+                  <Typography variant="body1" className={classes.key}>
+                    Customer Name:
+                  </Typography>
+                  <Typography variant="body1" className={classes.value}>
+                    {data.loan?.customer?.name || 'N/A'}
+                  </Typography>
+                </ListItem>
+                <ListItem className={classes.listItem}>
+                  <Typography variant="body1" className={classes.key}>
+                    Interest Payment Amount:
+                  </Typography>
+                  <Typography variant="body1" className={classes.value}>
+                    {data.interestPaymentAmount || 'N/A'}
+                  </Typography>
+                </ListItem>
+                <ListItem className={classes.listItem}>
+                  <Typography variant="body1" className={classes.key}>
+                    Loan Payment Amount:
+                  </Typography>
+                  <Typography variant="body1" className={classes.value}>
+                    {data.loanPaymentAmount || 'N/A'}
+                  </Typography>
+                </ListItem>
+                <ListItem className={classes.listItem}>
+                  <Typography variant="body1" className={classes.key}>
+                    Payment Date:
+                  </Typography>
+                  <Typography variant="body1" className={classes.value}>
+                    {data.paymentDate || 'N/A'}
+                  </Typography>
+                </ListItem>
+              </List>
+            </CardContent>
+          </Card>
+        );
+      }
+      return <Typography>No data available</Typography>;
+    }
+  
+    // Fallback: format report data for other report types
+    if (Array.isArray(data)) {
+      return data.map((item, index) => (
+        <Card key={index} className={classes.card}>
+          <CardContent className={classes.cardContent}>
+            <Typography variant="h6">Report {index + 1}</Typography>
+            <List>
+              {Object.entries(item).map(([key, value]) => (
+                <ListItem key={key} className={classes.listItem}>
+                  <Typography variant="body1" className={classes.key}>
+                    {key.replace(/([A-Z])/g, ' $1').toUpperCase()}:
+                  </Typography>
+                  <Typography variant="body1" className={classes.value}>
+                    {typeof value === 'object' ? JSON.stringify(value, null, 2) : value}
+                  </Typography>
+                </ListItem>
+              ))}
+            </List>
+          </CardContent>
+        </Card>
+      ));
+    } else if (typeof data === 'object') {
+      return (
+        <Card className={classes.card}>
+          <CardContent className={classes.cardContent}>
+            <Typography variant="h6">Report Details</Typography>
+            <List>
+              {Object.entries(data).map(([key, value]) => (
+                <ListItem key={key} className={classes.listItem}>
+                  <Typography variant="body1" className={classes.key}>
+                    {key.replace(/([A-Z])/g, ' $1').toUpperCase()}:
+                  </Typography>
+                  <Typography variant="body1" className={classes.value}>
+                    {typeof value === 'object' ? JSON.stringify(value, null, 2) : value}
+                  </Typography>
+                </ListItem>
+              ))}
+            </List>
+          </CardContent>
+        </Card>
+      );
+    }
+    return <Typography></Typography>;
+  };
+  
+
 
   return (
     <div>
@@ -131,7 +303,7 @@ export default function Reports({ loanId }) {
                 <Grid item xs={12} md={6} key={label}>
                   <Card
                     className={classes.card}
-                    onClick={() => handleCardClick(endpoint + (endpoint.includes('customerId') ? loanId : ''))}
+                    onClick={() => handleCardClick(endpoint)}
                   >
                     <CardContent className={classes.cardContent}>
                       <Typography className={classes.cardText}>
@@ -163,22 +335,47 @@ export default function Reports({ loanId }) {
           )}
         </Box>
         <Box className={classes.reportContent}>
+          {/* Conditionally show dropdown only for 'Show Customer Statement Details' */}
+          {reportType === 'user_statement?customerId=' && (
+             <Stack direction="row" spacing={3}>
+            <FormControl className={classes.formControl}>
+              <InputLabel id="customer-select-label">Select Customer</InputLabel>
+              <Select
+                labelId="customer-select-label"
+                value={selectedCustomerId}
+                onChange={(e) => setSelectedCustomerId(e.target.value)}
+              >
+                <MenuItem value="" disabled>Select a customer</MenuItem>
+                {customerOptions.length > 0 ? (
+                  customerOptions.map(customer => (
+                    <MenuItem key={customer.id} value={customer.id}>
+                      {customer.name}
+                    </MenuItem>
+                  ))
+                ) : (
+                  <MenuItem disabled>No customers available</MenuItem>
+                )}
+              </Select>
+             
+
+                <Button
+                  className={classes.button}
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => { handleShowCustomerStatementDetails(reportType)}}
+                >
+                  Show Customer Statement Details
+                </Button>
+             
+            </FormControl>
+            </Stack>
+          )}
           {loading && <Typography>Loading...</Typography>}
-          {reportData && !loading && (
-            <Box p={2}>
-              <List>
-                {Object.entries(reportData).map(([key, value]) => (
-                  <ListItem key={key} className={classes.listItem}>
-                    <Typography variant="body1" className={classes.key}>
-                      {key.replace(/([A-Z])/g, ' $1').toUpperCase()}:
-                    </Typography>
-                    <Typography variant="body1" className={classes.value}>
-                      {typeof value === 'object' ? JSON.stringify(value, null, 2) : value}
-                    </Typography>
-                  </ListItem>
-                ))}
-              </List>
-              <Box className={classes.buttonContainer}>
+          {!loading && reportData && formatReportData(reportData)}
+          {!loading && !reportData && <Typography></Typography>}
+          {!loading && reportData && (
+            <Box className={classes.buttonContainer}>
+              <Stack direction="row" spacing={3}>
                 <Button
                   className={classes.button}
                   variant="contained"
@@ -195,7 +392,7 @@ export default function Reports({ loanId }) {
                 >
                   Download
                 </Button>
-              </Box>
+              </Stack>
             </Box>
           )}
         </Box>
@@ -205,5 +402,8 @@ export default function Reports({ loanId }) {
 }
 
 Reports.propTypes = {
-  loanId: PropTypes.string.isRequired,
+  customerList: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+  })).isRequired,
 };

@@ -119,6 +119,7 @@ export default function Dashboard() {
   const onReportClick = () => {
     setShowReport(!showReport);
     setShowDashboard(false);
+    fetchCustomerList(); 
   };
   const fetchCustomerList = async () => {
     try {
@@ -288,7 +289,7 @@ export default function Dashboard() {
               )}
               {showReport && (
                 <Grid item xs={12}>
-                  <Reports />
+                  <Reports customerList={customerList}/>
                 </Grid>
               )}
               {showLoanDetail && (
