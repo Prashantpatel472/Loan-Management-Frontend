@@ -84,14 +84,14 @@ export default function Reports({ customerList }) {
   const [loading, setLoading] = React.useState(false); // Loading state
   const [reportType, setReportType] = React.useState(''); // Track the type of report requested
   const [buttonsVisible, setButtonsVisible] = React.useState(true); // State to control button visibility
-  const [selectedCustomerId, setSelectedCustomerId] = React.useState(''); // State for selected customer ID
+  const [selectedCustomerId, setSelectedCustomerId] = React.useState(0); // State for selected customer ID
 
   const handleClose = () => {
     setOpen(false);
   };
 
   // Ensure customerOptions is always an array
-  const customerOptions = customerList?.content || [];
+  const customerOptions = customerList;
   console.log('customerOptions:', customerOptions);
   // Log the customer list for debugging
   React.useEffect(() => {
@@ -148,98 +148,8 @@ export default function Reports({ customerList }) {
   };
 
   const formatReportData = (data) => {
-    if (reportType === 'user_statement?customerId=') {
-      if (Array.isArray(data)) {
-        // Handle array format for user_statement report type
-        return data.map((item, index) => (
-          <Card key={index} className={classes.card}>
-            <CardContent className={classes.cardContent}>
-              <Typography variant="h6">Report {index + 1}</Typography>
-              <List>
-                <ListItem className={classes.listItem}>
-                  <Typography variant="body1" className={classes.key}>
-                    Customer Name:
-                  </Typography>
-                  <Typography variant="body1" className={classes.value}>
-                    {item.loan?.customer?.name || 'N/A'}
-                  </Typography>
-                </ListItem>
-                <ListItem className={classes.listItem}>
-                  <Typography variant="body1" className={classes.key}>
-                    Interest Payment Amount:
-                  </Typography>
-                  <Typography variant="body1" className={classes.value}>
-                    {item.interestPaymentAmount || 'N/A'}
-                  </Typography>
-                </ListItem>
-                <ListItem className={classes.listItem}>
-                  <Typography variant="body1" className={classes.key}>
-                    Loan Payment Amount:
-                  </Typography>
-                  <Typography variant="body1" className={classes.value}>
-                    {item.loanPaymentAmount || 'N/A'}
-                  </Typography>
-                </ListItem>
-                <ListItem className={classes.listItem}>
-                  <Typography variant="body1" className={classes.key}>
-                    Payment Date:
-                  </Typography>
-                  <Typography variant="body1" className={classes.value}>
-                    {item.paymentDate || 'N/A'}
-                  </Typography>
-                </ListItem>
-              </List>
-            </CardContent>
-          </Card>
-        ));
-      } else if (typeof data === 'object') {
-        // Handle object format for user_statement report type
-        return (
-          <Card className={classes.card}>
-            <CardContent className={classes.cardContent}>
-              <Typography variant="h6">Report Details</Typography>
-              <List>
-                <ListItem className={classes.listItem}>
-                  <Typography variant="body1" className={classes.key}>
-                    Customer Name:
-                  </Typography>
-                  <Typography variant="body1" className={classes.value}>
-                    {data.loan?.customer?.name || 'N/A'}
-                  </Typography>
-                </ListItem>
-                <ListItem className={classes.listItem}>
-                  <Typography variant="body1" className={classes.key}>
-                    Interest Payment Amount:
-                  </Typography>
-                  <Typography variant="body1" className={classes.value}>
-                    {data.interestPaymentAmount || 'N/A'}
-                  </Typography>
-                </ListItem>
-                <ListItem className={classes.listItem}>
-                  <Typography variant="body1" className={classes.key}>
-                    Loan Payment Amount:
-                  </Typography>
-                  <Typography variant="body1" className={classes.value}>
-                    {data.loanPaymentAmount || 'N/A'}
-                  </Typography>
-                </ListItem>
-                <ListItem className={classes.listItem}>
-                  <Typography variant="body1" className={classes.key}>
-                    Payment Date:
-                  </Typography>
-                  <Typography variant="body1" className={classes.value}>
-                    {data.paymentDate || 'N/A'}
-                  </Typography>
-                </ListItem>
-              </List>
-            </CardContent>
-          </Card>
-        );
-      }
-      return <Typography>No data available</Typography>;
-    }
+    
   
-    // Fallback: format report data for other report types
     if (Array.isArray(data)) {
       return data.map((item, index) => (
         <Card key={index} className={classes.card}>
@@ -260,27 +170,51 @@ export default function Reports({ customerList }) {
           </CardContent>
         </Card>
       ));
-    } else if (typeof data === 'object') {
-      return (
-        <Card className={classes.card}>
+    } else if (data && typeof data === 'object') {
+      // Flatten the nested structure into a more displayable format
+      return Object.values(data).flat().map((item, index) => (
+        <Card key={index} className={classes.card}>
           <CardContent className={classes.cardContent}>
-            <Typography variant="h6">Report Details</Typography>
+            <Typography variant="h6">Report {index + 1}</Typography>
             <List>
-              {Object.entries(data).map(([key, value]) => (
-                <ListItem key={key} className={classes.listItem}>
-                  <Typography variant="body1" className={classes.key}>
-                    {key.replace(/([A-Z])/g, ' $1').toUpperCase()}:
-                  </Typography>
-                  <Typography variant="body1" className={classes.value}>
-                    {typeof value === 'object' ? JSON.stringify(value, null, 2) : value}
-                  </Typography>
-                </ListItem>
-              ))}
+              <ListItem className={classes.listItem}>
+                <Typography variant="body1" className={classes.key}>
+                  Customer Name:
+                </Typography>
+                <Typography variant="body1" className={classes.value}>
+                  {item.loan?.customer?.name || 'N/A'}
+                </Typography>
+              </ListItem>
+              <ListItem className={classes.listItem}>
+                <Typography variant="body1" className={classes.key}>
+                  Interest Payment Amount:
+                </Typography>
+                <Typography variant="body1" className={classes.value}>
+                  {item.interestPaymentAmount || 'N/A'}
+                </Typography>
+              </ListItem>
+              <ListItem className={classes.listItem}>
+                <Typography variant="body1" className={classes.key}>
+                  Loan Payment Amount:
+                </Typography>
+                <Typography variant="body1" className={classes.value}>
+                  {item.loanPaymentAmount || 'N/A'}
+                </Typography>
+              </ListItem>
+              <ListItem className={classes.listItem}>
+                <Typography variant="body1" className={classes.key}>
+                  Payment Date:
+                </Typography>
+                <Typography variant="body1" className={classes.value}>
+                  {item.paymentDate || 'N/A'}
+                </Typography>
+              </ListItem>
             </List>
           </CardContent>
         </Card>
-      );
-    }
+      ));
+    } 
+  
     return <Typography></Typography>;
   };
   

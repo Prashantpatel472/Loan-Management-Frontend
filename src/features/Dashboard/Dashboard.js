@@ -123,7 +123,7 @@ export default function Dashboard() {
   };
   const fetchCustomerList = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/customer?page=0&size=50&sortBy=id`);
+      const response = await fetch(`http://localhost:8080/customer/name`);
       if (!response.ok) {
         throw new Error('Failed to fetch customer list');
       }

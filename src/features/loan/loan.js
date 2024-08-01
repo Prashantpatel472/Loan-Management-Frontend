@@ -54,7 +54,7 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement,cu
   const [selectedLoanId, setSelectedLoanId] = useState(null);
   const [paymentAmount, setPaymentAmount] = useState(0);
   const [paymentDate, setPaymentDate] = useState();
-  const [customerNameList, setNameCustomerList] = React.useState({customerList});
+  const [customerNameList, setNameCustomerList] = React.useState(customerList);
   const firms = ['Firm1', 'Firm2', 'Firm3'];
   const loanTypes = ['gold', 'property', 'other'];
 
@@ -151,13 +151,27 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement,cu
   useEffect(() => {
     if (customerId) {
       fetchLoanDetails(selectedSortBy, page, rowsPerPage);
+      
+      console.log('customerNameList Options:', customerNameList);
     }
   }, [customerId, selectedSortBy, page, rowsPerPage,customerNameList]);
-
+ 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-    setNewLoanData(prevState => ({ ...prevState, [name]: value }));
+    if (name === 'customer.id') {
+      setNewLoanData(prevState => ({
+        ...prevState,
+        customer: { id: value } // Correctly updating the nested customer object
+      }));
+    } else {
+      setNewLoanData(prevState => ({
+        ...prevState,
+        [name]: value // Updating other properties as usual
+      }));
+    }
   };
+  
+
 
   const handleBackClick = () => {
     handleBack();
@@ -178,7 +192,7 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement,cu
     setPage(0);
     fetchLoanDetails(selectedSortBy, 0, parseInt(event.target.value, 10));
   };
-  const customerOptions = customerList?.content || [];
+  const customerOptions = customerList;
   return (
     <Box>
       {showLoan && (
@@ -280,21 +294,21 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement,cu
         <Box mt={4}>
           <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <InputLabel id="customer-select-label">Customer</InputLabel>
-                  <Select
-                    labelId="customer-select-label"
-                    name="customer.id"
-                    value={newLoanData.customer.id || ''}
-                    onChange={handleInputChange}
-                  >
-                    {customerOptions.map(customer => (
-                      <MenuItem key={customer.id} value={customer.id}>
-                        {customer.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+          <FormControl fullWidth>
+                <InputLabel id="customer-select-label">Customer</InputLabel>
+                <Select
+                  labelId="customer-select-label"
+                  name="customer.id"
+                  value={newLoanData.customer.id}
+                  onChange={handleInputChange}
+                >
+                  {customerOptions.map((customer) => (
+                    <MenuItem key={customer.id} value={customer.id}>
+                      {customer.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
               </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
