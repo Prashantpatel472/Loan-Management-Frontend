@@ -14,12 +14,13 @@ import {
   IconButton,
   CircularProgress,
   TablePagination,
+  Stack,
 } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
 
 const API_URL = 'http://localhost:8080/customer';
 
-const CustomersList = ({ handleShowLoan }) => {
+const CustomersList = ({ handleShowLoan ,handleShowCustomerDetail}) => {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -110,7 +111,7 @@ const CustomersList = ({ handleShowLoan }) => {
       console.error(`Error ${isEditing ? 'updating' : 'creating'} customer:`, error);
     }
   };
-
+  
   const handleDeleteCustomer = async (customerId) => {
     try {
       const response = await fetch(`${API_URL}/${customerId}`, {
@@ -150,7 +151,14 @@ const CustomersList = ({ handleShowLoan }) => {
 
   const handleChangeDocument = (event) => {
     const file = event.target.files[0];
-    setDocument(file);
+    convertToBase64(file).then((base64) => {
+      setDocument(base64);
+      setCustomerData((prevData) => ({
+        ...prevData,
+        document: base64,
+      }));
+    });
+    
   };
 
   const convertToBase64 = (file) => {
@@ -353,11 +361,11 @@ const CustomersList = ({ handleShowLoan }) => {
                   </Button>
                 </label>
                 </Box>
-                {imagePreview && <img src={imagePreview} alt="Image Preview" width="100" />}
+                {<img src={imagePreview} alt="Image Preview" width="100" />}
               </Grid>
               <Grid item xs={12} sm={6}>
                 <input
-                  accept=".pdf,.doc,.docx"
+                  accept=".pdf,.doc,.docx,image/*"
                   type="file"
                   onChange={handleChangeDocument}
                   id="select-document"
@@ -368,6 +376,7 @@ const CustomersList = ({ handleShowLoan }) => {
                     Upload Document
                   </Button>
                 </label>
+                {<img src={document} alt="Image Preview" width="100" />}
               </Grid>
               <Grid item xs={12}>
                 <Button variant="contained" color="secondary" type="submit">
@@ -411,9 +420,19 @@ const CustomersList = ({ handleShowLoan }) => {
                     <TableCell>{customer.phone}</TableCell>
                     <TableCell>{customer.aadharNumber}</TableCell>
                     <TableCell>
+                    <Stack direction="row" spacing={3}>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={() => handleShowCustomerDetail(customer.id)}
+                        >
+                          Show Customer Detail
+                        </Button>
                       <IconButton onClick={() => startUpdate(customer)}>
                         <Edit />
+
                       </IconButton>
+                     </Stack>
                     </TableCell>
                   </TableRow>
                 ))

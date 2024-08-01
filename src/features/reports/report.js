@@ -133,8 +133,13 @@ export default function Reports({ customerList }) {
   };
 
   const handleDownload = () => {
-    const endpoint = reportType.replace(/^\w+\/(.+)$/, '$1'); // Extract the endpoint from reportType
-    window.open(`http://localhost:8080/report/${endpoint}?download=true`, '_blank');
+    if (reportType === 'user_statement?customerId=') {
+      window.open( `http://localhost:8080/report/user_statement?customerId=${selectedCustomerId}&download=true`);
+    }else{
+      window.open(`http://localhost:8080/report/${reportType}?download=true`, '_blank');
+    }
+   
+   
   };
 
   const handleBack = () => {
@@ -145,6 +150,7 @@ export default function Reports({ customerList }) {
 
   const handleShowCustomerStatementDetails = (endpoint) => {
     fetchReportDetails(endpoint);
+    setReportType(endpoint);
   };
 
   const formatReportData = (data) => {

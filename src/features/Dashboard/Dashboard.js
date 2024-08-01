@@ -24,6 +24,7 @@ import CustomersList from '../customers/CustomersList';
 import Reports from '../reports/report';
 import LoanDetail from '../loan/LoanDetail';
 import Statement from '../loan/Statement';
+import CustomerDetail from '../customers/CustomerDetail';
 
 const drawerWidth = 240;
 
@@ -81,6 +82,7 @@ export default function Dashboard() {
   const [selectedSortBy, setSelectedSortBy] = React.useState("id");
   const [showReport, setShowReport] = React.useState(false);
   const [showLoanDetail, setShowLoanDetail] = React.useState(false);
+  const [showCustomerDetail, setShowCustomerDetail] = React.useState(false);
   const [showsSatement, setShowsSatement] = React.useState(false);
   const [selectedLoanId, setSelectedLoanId] = React.useState(0);
   const [showDashboard, setShowDashboard] = React.useState(false);
@@ -98,6 +100,10 @@ export default function Dashboard() {
     setSelectedLoanId(loanId);
   };
 
+  const handleShowCustomerDetail = (customerId) => {
+    setShowCustomerDetail(!showCustomerDetail);
+    setSelectedCustomerId(customerId);
+  };
   const handleStatement = (loanId) => {
     setShowsSatement(!showsSatement);
     setSelectedLoanId(loanId);
@@ -279,7 +285,7 @@ export default function Dashboard() {
               )}
               {showCustomers && (
                 <Grid item xs={12}>
-                  <CustomersList handleShowLoan={handleShowLoan} />
+                  <CustomersList handleShowLoan={handleShowLoan} handleShowCustomerDetail={handleShowCustomerDetail} />
                 </Grid>
               )}
               {selectedCustomerId && showLoan && (
@@ -295,6 +301,11 @@ export default function Dashboard() {
               {showLoanDetail && (
                 <Grid item xs={12}>
                   <LoanDetail loanId={selectedLoanId} />
+                </Grid>
+              )}
+              {showCustomerDetail && (
+                <Grid item xs={12}>
+                  <CustomerDetail customerId={selectedCustomerId} />
                 </Grid>
               )}
               {showsSatement && (
