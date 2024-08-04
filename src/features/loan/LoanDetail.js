@@ -8,6 +8,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
 import { makeStyles } from '@mui/styles';
 import Box from '@mui/material/Box';
+import { APIHEADER } from '../../common/constants';
 
 // Define styles for the dialog
 const useStyles = makeStyles({
@@ -50,7 +51,7 @@ export default function LoanDetail({ loanId }) {
   React.useEffect(() => {
     const fetchLoanDetail = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/loan/${loanId}`, {
+        const response = await fetch(`http://${APIHEADER}:8080/loan/${loanId}`, {
           method: 'GET',
         });
         if (!response.ok) {

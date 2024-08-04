@@ -24,6 +24,7 @@ import {
   DialogTitle,
 } from '@mui/material';
 import LoanCalculator from './LoanCalculator';
+import { APIHEADER } from '../../common/constants';
 
 const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement,customerList}) => {
   const [loanDetailsList, setLoanDetailsList] = useState([]);
@@ -57,11 +58,12 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement,cu
   const [customerNameList, setNameCustomerList] = React.useState(customerList);
   const firms = ['Firm1', 'Firm2', 'Firm3'];
   const loanTypes = ['gold', 'property', 'other'];
+  const [sortOrder, setSortOrder] = useState('asc');
 
   const fetchLoanDetails = async (sortBy, page, size) => {
     let id = isNaN(parseFloat(customerId)) ? 0 : customerId;
     try {
-      const response = await fetch(`http://localhost:8080/loan?customerId=${id}&page=${page}&size=${size}&sortBy=${sortBy}`);
+      const response = await fetch(`http://${APIHEADER}:8080/loan?customerId=${id}&page=${page}&size=${size}&sortBy=${sortBy}`);
       if (!response.ok) {
         throw new Error('Failed to fetch loan details');
       }
@@ -71,11 +73,12 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement,cu
       console.error('Error fetching loan details:', error);
     }
   };
+  
 
   const handleCreateLoan = async () => {
     try {
       console.log('newLoanData:', newLoanData);
-      const response = await fetch(`http://localhost:8080/loan`, {
+      const response = await fetch(`http://${APIHEADER}:8080/loan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newLoanData),
@@ -110,7 +113,7 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement,cu
 
   const handleDeleteLoan = async (loanId) => {
     try {
-      const response = await fetch(`http://localhost:8080/loan/delete/${loanId}`, {
+      const response = await fetch(`http://${APIHEADER}:8080/loan/delete/${loanId}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
@@ -129,7 +132,7 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement,cu
 
   const handlePaymentSubmit = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/loan/payment?loanId=${selectedLoanId}&loanPayment=${paymentAmount}&paymentDate=${paymentDate}`, {
+      const response = await fetch(`http://${APIHEADER}:8080/loan/payment?loanId=${selectedLoanId}&loanPayment=${paymentAmount}&paymentDate=${paymentDate}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         
@@ -176,10 +179,11 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement,cu
   const handleBackClick = () => {
     handleBack();
   };
-
   const handleSortChange = (sortBy) => {
+    const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; // Toggle sort order
     setSelectedSortBy(sortBy);
-    fetchLoanDetails(sortBy, page, rowsPerPage);
+    setSortOrder(newSortOrder);
+    fetchLoanDetails(`${newSortOrder === 'asc' ? '' : '-'}${sortBy}`, page, rowsPerPage);
   };
 
   const handlePageChange = (event, newPage) => {
@@ -227,17 +231,48 @@ const Loan = ({ customerId, handleBack, handleShowLoanDetail ,handleStatement,cu
 
           <TableContainer component={Card}>
             <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell style={{ cursor: 'pointer' }} onClick={() => handleSortChange("id")}>Loan no</TableCell>
-                  <TableCell style={{ cursor: 'pointer' }} onClick={() => handleSortChange("customer.name")}>Customer Name</TableCell>
-                  <TableCell style={{ cursor: 'pointer' }} onClick={() => handleSortChange("firmName")}>Firm Name</TableCell>
-                  <TableCell style={{ cursor: 'pointer' }} onClick={() => handleSortChange("loanDate")}>Loan Date</TableCell>
-                  <TableCell style={{ cursor: 'pointer' }} onClick={() => handleSortChange("loanAmount")}>Loan Amount</TableCell>
-                  <TableCell style={{ cursor: 'pointer' }} onClick={() => handleSortChange("paymentDate")}>Payment Date</TableCell>
-                  <TableCell>Actions</TableCell>
-                </TableRow>
-              </TableHead>
+            <TableHead>
+  <TableRow>
+    <TableCell
+      style={{ cursor: 'pointer' }}
+      onClick={() => handleSortChange('id')}
+    >
+      Loan no {selectedSortBy === 'id' && (sortOrder === 'asc' ? '▲' : '▼')}
+    </TableCell>
+    <TableCell
+      style={{ cursor: 'pointer' }}
+      onClick={() => handleSortChange('customer.name')}
+    >
+      Customer Name {selectedSortBy === 'customer.name' && (sortOrder === 'asc' ? '▲' : '▼')}
+    </TableCell>
+    <TableCell
+      style={{ cursor: 'pointer' }}
+      onClick={() => handleSortChange('firmName')}
+    >
+      Firm Name {selectedSortBy === 'firmName' && (sortOrder === 'asc' ? '▲' : '▼')}
+    </TableCell>
+    <TableCell
+      style={{ cursor: 'pointer' }}
+      onClick={() => handleSortChange('loanDate')}
+    >
+      Loan Date {selectedSortBy === 'loanDate' && (sortOrder === 'asc' ? '▲' : '▼')}
+    </TableCell>
+    <TableCell
+      style={{ cursor: 'pointer' }}
+      onClick={() => handleSortChange('loanAmount')}
+    >
+      Loan Amount {selectedSortBy === 'loanAmount' && (sortOrder === 'asc' ? '▲' : '▼')}
+    </TableCell>
+    <TableCell
+      style={{ cursor: 'pointer' }}
+      onClick={() => handleSortChange('paymentDate')}
+    >
+      Payment Date {selectedSortBy === 'paymentDate' && (sortOrder === 'asc' ? '▲' : '▼')}
+    </TableCell>
+    <TableCell>Actions</TableCell>
+  </TableRow>
+</TableHead>
+
               <TableBody>
                 {loanDetailsList.map((loan, index) => (
                   <TableRow key={index}>

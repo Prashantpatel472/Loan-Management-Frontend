@@ -11,6 +11,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
 import Button from '@mui/material/Button';
+import { APIHEADER } from '../../common/constants';
 
 // Define styles for the dialog
 const useStyles = makeStyles({
@@ -101,11 +102,11 @@ export default function Reports({ customerList }) {
   const fetchReportDetails = async (endpoint) => {
     try {
       setLoading(true);
-      let url = `http://localhost:8080/report/${endpoint}?download=false`;
+      let url = `http://${APIHEADER}:8080/report/${endpoint}?download=false`;
       
       // Special case for 'Show Customer Statement Details'
       if (reportType === 'user_statement?customerId=') {
-        url = `http://localhost:8080/report/user_statement?customerId=${selectedCustomerId}&download=false`;
+        url = `http://${APIHEADER}:8080/report/user_statement?customerId=${selectedCustomerId}&download=false`;
       }
      
       const response = await fetch(url);
@@ -134,9 +135,9 @@ export default function Reports({ customerList }) {
 
   const handleDownload = () => {
     if (reportType === 'user_statement?customerId=') {
-      window.open( `http://localhost:8080/report/user_statement?customerId=${selectedCustomerId}&download=true`);
+      window.open( `http://${APIHEADER}:8080/report/user_statement?customerId=${selectedCustomerId}&download=true`);
     }else{
-      window.open(`http://localhost:8080/report/${reportType}?download=true`, '_blank');
+      window.open(`http://${APIHEADER}:8080/report/${reportType}?download=true`, '_blank');
     }
    
    
@@ -279,16 +280,17 @@ export default function Reports({ customerList }) {
           {reportType === 'user_statement?customerId=' && (
              <Stack direction="row" spacing={3}>
             <FormControl className={classes.formControl}>
+           
               <InputLabel id="customer-select-label">Select Customer</InputLabel>
               <Select
                 labelId="customer-select-label"
                 value={selectedCustomerId}
                 onChange={(e) => setSelectedCustomerId(e.target.value)}
               >
-                <MenuItem value="" disabled>Select a customer</MenuItem>
+                
                 {customerOptions.length > 0 ? (
                   customerOptions.map(customer => (
-                    <MenuItem key={customer.id} value={customer.id}>
+                    <MenuItem  Select a customer key={customer.id} value={customer.id}>
                       {customer.name}
                     </MenuItem>
                   ))
@@ -296,7 +298,7 @@ export default function Reports({ customerList }) {
                   <MenuItem disabled>No customers available</MenuItem>
                 )}
               </Select>
-             
+              </FormControl>
 
                 <Button
                   className={classes.button}
@@ -307,8 +309,8 @@ export default function Reports({ customerList }) {
                   Show Customer Statement Details
                 </Button>
              
-            </FormControl>
-            </Stack>
+           
+             </Stack>
           )}
           {loading && <Typography>Loading...</Typography>}
           {!loading && reportData && formatReportData(reportData)}

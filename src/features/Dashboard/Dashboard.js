@@ -25,6 +25,7 @@ import Reports from '../reports/report';
 import LoanDetail from '../loan/LoanDetail';
 import Statement from '../loan/Statement';
 import CustomerDetail from '../customers/CustomerDetail';
+import { APIHEADER } from '../../common/constants';
 
 const drawerWidth = 240;
 
@@ -129,7 +130,7 @@ export default function Dashboard() {
   };
   const fetchCustomerList = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/customer/name`);
+      const response = await fetch(`http://${APIHEADER}:8080/customer/name`);
       if (!response.ok) {
         throw new Error('Failed to fetch customer list');
       }

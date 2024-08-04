@@ -17,7 +17,7 @@ export default function Payment({ loanId }) {
 
   const handlePaymentSubmit = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/loan/payment?loanId=${selectedLoanId}&loanPayment=${paymentAmount}&paymentDate=${paymentDate}`, {
+      const response = await fetch(`http://${APIHEADER}:8080/loan/payment?loanId=${selectedLoanId}&loanPayment=${paymentAmount}&paymentDate=${paymentDate}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         

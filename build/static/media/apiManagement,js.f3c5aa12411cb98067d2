@@ -1,3 +1,0 @@
-export const LOGIN_API_URL = 'http://localhost:8080/user/login';
-
-export const GET_LOAN_API_URL = 'http://localhost:8080/customer/:customerId/loans';

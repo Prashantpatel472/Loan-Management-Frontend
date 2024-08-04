@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
 
-const API_URL = 'http://localhost:8080/customer';
+const API_URL = 'http://${APIHEADER}:8080/customer';
 
 const CustomersList = ({ handleShowLoan ,handleShowCustomerDetail}) => {
   const [customers, setCustomers] = useState([]);

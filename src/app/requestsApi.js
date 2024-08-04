@@ -3,7 +3,7 @@ import { getLocalStorageData } from "../common/utility";
 
 // Default config options
 const defaultOptions = {
-    baseURL: "http://localhost:8080/",
+    baseURL: "http://${APIHEADER}:8080/",
     headers: {
         "content-type": "application/json",
         "Access-Control-Allow-Origin": "*",

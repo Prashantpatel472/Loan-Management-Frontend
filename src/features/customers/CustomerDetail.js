@@ -9,6 +9,7 @@ import Dialog from '@mui/material/Dialog';
 import { makeStyles } from '@mui/styles';
 import Box from '@mui/material/Box';
 import { Stack } from '@mui/material';
+import { APIHEADER } from '../../common/constants';
 
 // Define styles for the dialog
 const useStyles = makeStyles({
@@ -68,7 +69,7 @@ export default function CustomerDetail({ customerId }) {
   React.useEffect(() => {
     const fetchCustomerDetail = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/customer/id/${customerId}`, {
+        const response = await fetch(`http://${APIHEADER}:8080/customer/id/${customerId}`, {
           method: 'GET',
         });
         if (!response.ok) {
@@ -98,8 +99,8 @@ export default function CustomerDetail({ customerId }) {
         <DialogTitle>Customer Detail</DialogTitle>
         {customerDetail ? (
           <Box >
-            <Stack direction="row"  marginLeft={2} spacing={2}>
-           
+            <Stack direction="column"  marginLeft={2} spacing={2}>
+            <Typography> photo  </Typography>
              <Box  height={150}
              width={150}
              my={4}
@@ -109,6 +110,7 @@ export default function CustomerDetail({ customerId }) {
              gap={4}
              p={2}
              sx={{ border: '2px solid grey' }}>
+              
              <img
                 src={`data:image/jpeg;base64,${customerDetail.photo}`}
                 alt="Customer"
@@ -117,21 +119,7 @@ export default function CustomerDetail({ customerId }) {
                </Box>
            
            
-               <Box  height={150}
-             width={150}
-             my={4}
-             marginLeft={5}
-             display="flex"
-             alignItems="center"
-             gap={4}
-             p={2}
-             sx={{ border: '2px solid grey' }}>
-             <img
-                src={`data:image/jpeg;base64,${customerDetail.document}`}
-                alt="Customer"
-                className={classes.photo}
-              />
-               </Box>
+              
                </Stack>
            
             <List>
@@ -148,6 +136,21 @@ export default function CustomerDetail({ customerId }) {
                   </ListItem>
                 ))}
             </List>
+            <Box  height={150}
+             width={150}
+             my={4}
+             marginLeft={5}
+             display="flex"
+             alignItems="center"
+             gap={4}
+             p={2}
+             sx={{ border: '2px solid grey' }}>
+             <img
+                src={`data:image/jpeg;base64,${customerDetail.document}`}
+                alt="document"
+                className={classes.photo}
+              />
+               </Box>
             <Box className={classes.buttonContainer}>
               <Button variant="contained" color="secondary" onClick={() => handleClose(null)}>
                 Cancel

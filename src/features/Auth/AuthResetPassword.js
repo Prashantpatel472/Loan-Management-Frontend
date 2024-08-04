@@ -26,7 +26,7 @@ const AuthResetPassword = () => {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [currentshowPassword, setCurrentShowPassword] = useState(false);
-    const API_URL = 'http://localhost:8080/user/reset-password';
+    const API_URL = 'http://${APIHEADER}:8080/user/reset-password';
     const validationSchema = Yup.object().shape({
         userName: Yup.string().required("User Name is required"),
         password: Yup.string().required("Password is required"),
