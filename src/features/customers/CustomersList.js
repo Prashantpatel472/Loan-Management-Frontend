@@ -95,7 +95,7 @@ const CustomersList = ({ handleShowLoan ,handleShowCustomerDetail}) => {
 
       const method = isEditing ? 'PUT' : 'POST';
       
-      const response = await fetch('http://'+{APIHEADER}+':8080/customer', {
+      const response = await fetch('http://'+APIHEADER+':8080/customer', {
         method,
         body: formData,
       });
