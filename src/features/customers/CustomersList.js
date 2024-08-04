@@ -17,6 +17,7 @@ import {
   Stack,
 } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
+import { APIHEADER } from '../../common/constants';
 
 const API_URL = 'http://${APIHEADER}:8080/customer';
 
@@ -54,7 +55,7 @@ const CustomersList = ({ handleShowLoan ,handleShowCustomerDetail}) => {
   const getCustomers = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}?page=${currentPage}&size=${pageSize}&sortBy=id`);
+      const response = await fetch(`http://${APIHEADER}:8080/customer?page=${currentPage}&size=${pageSize}&sortBy=id`);
       if (!response.ok) {
         throw new Error('Failed to fetch customers');
       }
@@ -93,9 +94,8 @@ const CustomersList = ({ handleShowLoan ,handleShowCustomerDetail}) => {
       }
 
       const method = isEditing ? 'PUT' : 'POST';
-      const url = API_URL;
-
-      const response = await fetch(url, {
+      
+      const response = await fetch('http://'+{APIHEADER}+':8080/customer', {
         method,
         body: formData,
       });

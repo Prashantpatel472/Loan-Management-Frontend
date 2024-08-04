@@ -14,6 +14,7 @@ import Card from '@mui/material/Card';
 import Logo from '../../components/logo';
 import Divider from '@mui/material/Divider';
 import { bgGradient } from '../../theme/css';
+import { APIHEADER } from '../../common/constants';
 
 
 const Login = () => {
@@ -40,34 +41,41 @@ const Login = () => {
     navigate('/reset');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit =async (e) => {
     e.preventDefault();
     dispatch(startLoader());
 
-    const postData = {
-      userName: formData.userName,
-      password: formData.password,
-    };
+    const formDataN = new FormData();
+    formDataN.append('userName', formData.userName);
+    formDataN.append('password', formData.password);
 
-    loginApi(postData)
-      .then((data) => {
-        const { status, token } = data; // Extracting necessary data
-        if (status === 'success') {
-          localStorage.setItem('token', token); // Store token in localStorage
-          dispatch(loginSuccess({ userName: formData.userName, token }));
-          navigate('/dashboard');
-        } else {
-          throw new Error('Login failed');
-        }
-      })
-      .catch((error) => {
-        const errorMessage = error.message || 'Login failed';
-        dispatch(loginFailure(errorMessage));
-        dispatch(showAlert({ type: 'error', message: errorMessage }));
-      })
-      .finally(() => {
-        dispatch(stopLoader());
-      });
+  try {
+     let url = `http://${APIHEADER}:8080/user/login`;
+    const response = await fetch( url, {
+      method: 'POST',
+      body: formDataN,
+    });
+console.log("response",response);
+    if (!response.ok) {
+      alert("Login failed");
+      throw new Error('Login failed'); 
+    }
+
+    const data = await response.json();
+    console.log("data",data);
+   
+    const { status, token } = data; // Extracting necessary data
+    if (status === 'success') {
+      localStorage.setItem('token', token); // Store token in localStorage
+      dispatch(loginSuccess({ userName: formData.userName, token }));
+      navigate('/dashboard');
+    } else {
+      throw new Error('Login failed');
+    }
+  } catch (error) {
+    throw error;
+  }
+  
   };
 
   return (
